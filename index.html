@@ -1,9 +1,9 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-Hant-HK">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOHAS Store 完整核心系統 (Rules更新完美對接版 v14.6)</title>
+    <title>LOHAS Store 完整核心系統 (欄位對接完美升級版 v14.7)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* 全域樣式：嚴格遵從系統核心憲章（Core Constitution v2.3） */
@@ -228,7 +228,7 @@
         
         <header class="app-header">
             <span class="header-title">LOHAS Store 系統</span>
-            <span style="font-size:11px; background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:8px;">核心完美版 v14.6</span>
+            <span style="font-size:11px; background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:8px;">完整整合版 v14.7</span>
         </header>
 
         <div class="toast-msg" id="toastBox">提示訊息</div>
@@ -383,7 +383,7 @@
             </div>
 
             <div class="section-title">本地購物車清單</div>
-            <div class="card"><ul id="cart" class="cart-list"><li style="color:var(--text-light); font-style:italic; justify-content:center;">購物車目前無任何項目</li></ul></div>
+            <div class="card"><ul id="cart" class="cart-list"><li style="color:var(--text-light); font-style:italic; justify-content:center;">購物車目前無 any 項目</li></ul></div>
         </main>
 
         <section class="checkout-bar">
@@ -394,7 +394,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, query, where, getDocs, setDoc, runTransaction } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, query, where, getDocs, setDoc, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDnJJJmVSVGfTH92nDf51Ll9QoG1MKzTKM",
@@ -415,6 +415,7 @@
         let LIVE_FPS_QR = "";
 
         let currentUserId = ""; 
+        let currentUserPhone = "";
         let unsubscribeUserListener = null; 
         let cart = [];
         let currentSelectedPay = "PayMe";
@@ -533,12 +534,15 @@
                 const q = query(collection(db, "users"), where("phone", "==", phoneInput));
                 const querySnapshot = await getDocs(q);
                 let targetUID = "";
-                if (!querySnapshot.empty) { targetUID = querySnapshot.docs[0].id; } 
+                if (!querySnapshot.empty) { 
+                    targetUID = querySnapshot.docs[0].id; 
+                } 
                 else {
                     targetUID = "u" + Math.floor(10000 + Math.random() * 90000);
                     await setDoc(doc(db, "users", targetUID), { uid: targetUID, name: nameInput, phone: phoneInput, points: 0, totalSpent: 0, stamps: 0, maxStamps: 10, level: "普通會員", updatedAt: new Date() });
                 }
                 currentUserId = targetUID;
+                currentUserPhone = phoneInput;
                 startUserRealtimeListening(currentUserId);
                 toggleModal('regModalOverlay', false); toast("會籍成功對接");
             } catch (error) { console.error(error); }
@@ -551,6 +555,7 @@
             unsubscribeUserListener = onSnapshot(doc(db, "users", uid), (docSnap) => {
                 if(docSnap.exists() && currentUserId !== "") {
                     const uData = docSnap.data();
+                    currentUserPhone = uData.phone || "";
                     document.getElementById("mName").innerText = uData.name || "測試會員";
                     document.getElementById("mPhone").innerText = `手機: ${uData.phone || '-'}`;
                     document.getElementById("mUID").innerText = `會員卡號: ${docSnap.id}`;
@@ -576,7 +581,7 @@
 
         window.triggerSignOut = function() {
             if(unsubscribeUserListener) { unsubscribeUserListener(); unsubscribeUserListener = null; }
-            currentUserId = ""; cart = []; renderCart();
+            currentUserId = ""; currentUserPhone = ""; cart = []; renderCart();
             document.getElementById("mName").innerText = "未登入會籍";
             document.getElementById("mPhone").innerText = "手機: -";
             document.getElementById("mUID").innerText = "會員卡號: 未開通";
@@ -625,7 +630,7 @@
         function renderCart(){
             const el = document.getElementById("cart");
             if (cart.length === 0) {
-                el.innerHTML = `<li style="color:var(--text-light); font-style:italic; justify-content:center;">購物車目前無任何項目</li>`;
+                el.innerHTML = `<li style="color:var(--text-light); font-style:italic; justify-content:center;">購物車目前無 any 項目</li>`;
                 document.getElementById("total").innerText = "HK$ 0"; return;
             }
             el.innerHTML = ""; let total = 0;
@@ -663,7 +668,7 @@
             toggleModal('paymentModalOverlay', true);
         };
 
-        /* ✨ 完美對接 Rules 的終極原子交易：100% 同步扣減庫存、遞增積分消費額、建立訂單 */
+        /* ✨ 完美對接最新的原子交易欄位規範：userPhone, totalAmount, payment_status, receiptUrl */
         window.startServerOrderTransaction = async function() {
             const addressInput = document.getElementById("checkoutAddressField").value.trim();
             if(!addressInput) { 
@@ -724,18 +729,20 @@
                         }
                         transaction.update(userRef, { points: newPoints, totalSpent: newSpent, stamps: newStamps, level: newLevel, updatedAt: new Date() });
                         
+                        // 📝 精準校正並對接您最新的欄位規範：
                         const orderRef = doc(db, "orders", generatedOrderId);
                         transaction.set(orderRef, {
                             orderId: generatedOrderId, 
                             uid: currentUserId, 
+                            userPhone: currentUserPhone,          // 🔄 升級對接欄位 1
                             items: cart, 
-                            total: totalAmt, 
-                            status: "pending_verification",
+                            totalAmount: totalAmt,                // 🔄 升級對接欄位 2
                             paymentMethod: currentSelectedPay, 
+                            payment_status: "pending",            // 🔄 升級對接欄位 3 (✅關鍵)
+                            receiptUrl: "",                       // 🔄 升級對接欄位 4
                             merchantPhone: LIVE_MERCHANT_PHONE, 
                             address: finalSavedAddress, 
-                            receiptImgBase64: "", 
-                            createdAt: new Date()
+                            createdAt: new Date()                 // 使用本地 JS Date 在交易中落庫
                         });
                     });
 
@@ -764,7 +771,7 @@
             }, 1400);
         };
 
-        /* 第二步：上載過數紙追加更新 */
+        /* 第二步：上載過數紙追加更新，同步寫入 receiptUrl 欄位 */
         window.closeQrAndTriggerReceipt = async function() {
             if(!loadedReceiptBase64 || loadedReceiptBase64.trim() === "") {
                 alert("⚠️ 提交阻截：請先選取並上載您的轉帳入數收據截圖憑證！");
@@ -791,9 +798,11 @@
                 rcptWall.innerHTML += `<div class="receipt-item-line"><span>📦 ${item.name} (x${item.qty})</span><span>HK$ ${item.price * item.qty}</span></div>`;
             });
 
-            // 🔐 由於 Rules 已經完美放行 update，此處 Base64 收據追加將無阻通過！
+            // 🔐 配合您的最新欄位架構，追加寫入 receiptUrl 欄位
             try {
-                await setDoc(doc(db, "orders", cachedOrderIdForReceipt), { receiptImgBase64: loadedReceiptBase64 }, { merge: true });
+                await setDoc(doc(db, "orders", cachedOrderIdForReceipt), { 
+                    receiptUrl: loadedReceiptBase64 
+                }, { merge: true });
             } catch(err) { 
                 console.warn("憑證上載異常：", err.message); 
             }

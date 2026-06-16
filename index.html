@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOHAS Store 樂活智家零售與康復科技系統</title>
+    <title>LOHAS Store 樂活智家零售與康復科技系統 (核心完美的整合版 v16.5)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* 全域樣式：嚴格遵從系統核心憲章（Core Constitution v2.3） */
@@ -189,14 +189,14 @@
         .pay-route-list { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; text-align: left; }
         .pay-route-item { border: 2px solid #E0E0E0; border-radius: 10px; padding: 12px 14px; cursor: pointer; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; align-items: center; color: var(--text-dark); transition: all 0.15s ease; }
         
-        /* 🛠️ 支付管道點選核心視覺邏輯：強制點亮並支援優先權複寫 */
+        /* 支付管道點選核心視覺邏輯 */
         .pay-route-item.selected { 
             border: 2px solid var(--primary-color) !important; 
             color: var(--primary-color) !important; 
         }
         #route_payme.pay-route-item.selected { background-color: #FFEBEE !important; }
         #route_fps.pay-route-item.selected { background-color: #E8F5E9 !important; }
-        #route_alipay.pay-route-item.selected { background-color: #E3F2FD !important; } /* 🌟 確保渲染出精美的粉藍透色 */
+        #route_alipay.pay-route-item.selected { background-color: #E3F2FD !important; }
 
         .gateway-tag { font-size: 10px; background-color: #ECEFF1; color: #546E7A; padding: 2px 6px; border-radius: 4px; font-weight: normal; }
         .btn-submit-payment { background-color: var(--primary-color); color: var(--white); width: 100%; height: var(--button-height); border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 8px; }
@@ -316,18 +316,19 @@
                 </div>
 
                 <div class="copy-phone-badge" onclick="triggerNativeCameraSelector()">
-                    📸 即時拍照上傳
+                    📸 即時拍照 / 選擇入數紙
                 </div>
 
-                <div class="native-upload-zone">
-                    <button class="btn-fake-upload" id="uiFakeUploadBtn">🖼️ 點擊從相簿選取轉帳入數紙</button>
+                <div class="native-upload-zone" style="display:none;">
                     <input type="file" class="real-file-input" id="receiptFileInput" accept="image/*" onchange="handleReceiptFileSelect(event)">
-                    <div class="receipt-preview-box" id="uiRcptPreviewBox">
-                        <img src="" class="receipt-preview-img" id="uiRcptPreviewImg">
-                        <div class="receipt-preview-info">✓ 收據截圖加載成功<br><span style="font-size:9px; color:var(--text-light);">就緒，可點擊下方按鈕送出</span></div>
-                    </div>
                 </div>
 
+                <div class="receipt-preview-box" id="uiRcptPreviewBox" style="margin-bottom:10px;">
+                    <img src="" class="receipt-preview-img" id="uiRcptPreviewImg">
+                    <div class="receipt-preview-info">✓ 憑證已成功安全壓縮加載<br><span style="font-size:9px; color:var(--text-light);">就緒，可點擊下方按鈕送出</span></div>
+                </div>
+
+                <button class="btn-fake-upload" id="uiFakeUploadBtn" style="display:none;"></button>
                 <button class="btn-submit-payment" style="background-color:var(--accent-green);" onclick="closeQrAndTriggerReceipt()">我已完成轉帳，生成收據</button>
             </div>
         </div>
@@ -406,7 +407,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, query, where, getDocs, setDoc, runTransaction } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, query, where, getDocs, setDoc, runTransaction, updateDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDnJJJmVSVGfTH92nDf51Ll9QoG1MKzTKM",
@@ -449,21 +450,15 @@
             }
         };
 
-        // 🛠️ 升級版模糊兼精準雙校驗選取器：100% 確保點選 AlipayHK 時能激活 class 並點亮
         window.selectPayRoute = function(method) {
             currentSelectedPay = method;
             const routes = ['route_payme', 'route_alipay', 'route_fps'];
-            
             routes.forEach(rId => {
                 const el = document.getElementById(rId);
                 if (el) {
                     const isTarget = rId.includes(method.toLowerCase()) || 
                                      (method.toLowerCase() === 'alipayhk' && rId === 'route_alipay');
-                    if (isTarget) {
-                        el.classList.add('selected');
-                    } else {
-                        el.classList.remove('selected');
-                    }
+                    if (isTarget) el.classList.add('selected'); else el.classList.remove('selected');
                 }
             });
             toast(`已選擇渠道: ${method}`);
@@ -473,20 +468,39 @@
             document.getElementById("receiptFileInput").click();
         };
 
+        // ✨ 修正重點 2：前端無感 Canvas 壓縮，將大圖控制在 200KB 左右，確保不超過 1MB 限制
         window.handleReceiptFileSelect = function(event) {
             const file = event.target.files[0];
             if(!file) return;
+            
+            toast("⏳ 正在安全壓縮並同步憑證畫質...");
             const reader = new FileReader();
             reader.onload = function(e) {
-                loadedReceiptBase64 = e.target.result; 
-                const fakeBtn = document.getElementById("uiFakeUploadBtn");
-                if(fakeBtn) {
-                    fakeBtn.classList.add("has-file");
-                    fakeBtn.innerText = "✓ 已成功選取收據憑證";
-                }
-                document.getElementById("uiRcptPreviewImg").src = loadedReceiptBase64;
-                document.getElementById("uiRcptPreviewBox").style.display = "flex";
-                toast("📸 憑證圖片已成功載入預覽！");
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    // 超過 1024 像素則等比例收縮
+                    if (width > 1024) {
+                        height *= 1024 / width;
+                        width = 1024;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // 壓縮為 0.75 高清品質 JPEG，體積大幅縮減至 ~150KB
+                    loadedReceiptBase64 = canvas.toDataURL('image/jpeg', 0.75); 
+                    
+                    document.getElementById("uiRcptPreviewImg").src = loadedReceiptBase64;
+                    document.getElementById("uiRcptPreviewBox").style.display = "flex";
+                    toast("📸 憑證圖片已加載就緒！");
+                };
             };
             reader.readAsDataURL(file); 
         };
@@ -495,7 +509,7 @@
             const element = document.getElementById("targetReceiptPrintNode");
             const opt = {
                 margin:       [10, 10, 10, 10],
-                filename:      `LOHAS_Receipt_${cachedOrderIdForReceipt}.pdf`,
+                filename:     `LOHAS_Receipt_${cachedOrderIdForReceipt}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -683,13 +697,12 @@
             document.getElementById("uiRcptPreviewBox").style.display = "none";
             document.getElementById("receiptFileInput").value = "";
 
-            let total = cart.reduce((s, i) => s + s.price * i.qty, 0);
-            total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+            let total = cart.reduce((s, i) => s + i.price * i.qty, 0);
             document.getElementById("payModalAmt").innerText = "HK$ " + total;
             toggleModal('paymentModalOverlay', true);
         };
 
-        /* ✨ 原子交易：同步寫入 userPhone, totalAmount, payment_status, receiptUrl */
+        /* ✨ 修正重點 1：將金額欄位對齊為後台讀取的 'total'，同時保持資料庫標準化欄位寫入 */
         window.startServerOrderTransaction = async function() {
             const addressInput = document.getElementById("checkoutAddressField").value.trim();
             if(!addressInput) { 
@@ -748,17 +761,20 @@
                         }
                         transaction.update(userRef, { points: newPoints, totalSpent: newSpent, stamps: newStamps, level: newLevel, updatedAt: new Date() });
                         
-                        // 資料庫標準化欄位寫入
+                        // 🔓 完美對接：合併傳入 total (後台讀取) 與 totalAmount (標準欄位)
                         const orderRef = doc(db, "orders", generatedOrderId);
                         transaction.set(orderRef, {
                             orderId: generatedOrderId, 
                             uid: currentUserId, 
-                            userPhone: currentUserPhone,          
+                            userPhone: currentUserPhone,           
                             items: cart, 
-                            totalAmount: totalAmt,                
+                            total: totalAmt,                       // 🌟 修正：對接後台讀取的金額欄位
+                            totalAmount: totalAmt,                 
                             paymentMethod: currentSelectedPay, 
-                            payment_status: "pending",            
-                            receiptUrl: "",                       
+                            status: "pending_verification",        // 🌟 修正：對接後台的初始狀態
+                            payment_status: "pending",             
+                            receiptImgBase64: "",                  // 🌟 修正：預留後台讀取的圖片欄位
+                            receiptUrl: "",                        
                             merchantPhone: LIVE_MERCHANT_PHONE, 
                             address: finalSavedAddress, 
                             createdAt: new Date()                 
@@ -789,7 +805,7 @@
             }, 1400);
         };
 
-        /* 第二步：完成轉帳，追加上傳過數紙 */
+        /* 第二步：完成轉帳，追加上傳過數紙 (欄位完全對接版) */
         window.closeQrAndTriggerReceipt = async function() {
             if(!loadedReceiptBase64 || loadedReceiptBase64.trim() === "") {
                 alert("⚠️ 提交阻截：請先選取並上載您的轉帳入數收據截圖憑證！");
@@ -816,10 +832,12 @@
                 rcptWall.innerHTML += `<div class="receipt-item-line"><span>📦 ${item.name} (x${item.qty})</span><span>HK$ ${item.price * item.qty}</span></div>`;
             });
 
+            // 🔓 完美對接：同步更新後台等待的 receiptImgBase64 與 receiptUrl 欄位
             try {
-                await setDoc(doc(db, "orders", cachedOrderIdForReceipt), { 
-                    receiptUrl: loadedReceiptBase64 
-                }, { merge: true });
+                await updateDoc(doc(db, "orders", cachedOrderIdForReceipt), { 
+                    receiptImgBase64: loadedReceiptBase64,  // 🌟 修正：對接後台讀取的縮圖欄位
+                    receiptUrl: loadedReceiptBase64         
+                });
             } catch(err) { 
                 console.warn("憑證上載異常：", err.message); 
             }

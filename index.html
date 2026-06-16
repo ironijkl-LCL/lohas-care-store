@@ -93,14 +93,33 @@
             display: none;
         }
 
-        /* 會員中心卡片 */
+        /* 會員中心卡片調整：改為垂直分流排版，修正螢幕擷取畫面 2026-06-16 172124.png 走位缺陷 */
         .member-dash-card { background: linear-gradient(135deg, #37474F, #212121); color: var(--white); padding: 14px; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .member-info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .member-info-row { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; margin-bottom: 8px; }
         .member-name { font-size: 16px; font-weight: bold; }
-        .member-btn-zone { display: flex; gap: 6px; }
-        .btn-switch-user { background: rgba(255, 255, 255, 0.15); color: var(--white); border: 1px solid rgba(255,255,255,0.2); padding: 4px 10px; font-size: 11px; border-radius: 6px; cursor: pointer; font-weight: 500; }
-        .btn-view-receipt { background: rgba(255, 179, 0, 0.25); color: var(--secondary-color); border: 1px solid rgba(255,179,0,0.3); padding: 4px 10px; font-size: 11px; border-radius: 6px; cursor: pointer; font-weight: 500; display: none; }
-        .btn-logout-user { background: rgba(213, 0, 0, 0.4); color: #FFCDD2; border: 1px solid rgba(255,23,68,0.3); padding: 4px 10px; font-size: 11px; border-radius: 6px; cursor: pointer; font-weight: 500; display: none; }
+        
+        /* 按鈕區域：全寬平鋪，等寬分流 */
+        .member-btn-zone { display: flex; gap: 6px; width: 100%; justify-content: flex-start; }
+        
+        /* 按鈕基礎樣式：微調字體，鎖定 white-space 執齊一行出 */
+        .btn-switch-user, .btn-view-receipt, .btn-logout-user { 
+            flex: 1; 
+            height: 34px; 
+            font-size: 12px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 500; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            white-space: nowrap; 
+            padding: 0 4px;
+            text-align: center;
+        }
+        .btn-switch-user { background: rgba(255, 255, 255, 0.15); color: var(--white); border: 1px solid rgba(255,255,255,0.2); }
+        .btn-view-receipt { background: rgba(255, 179, 0, 0.25); color: var(--secondary-color); border: 1px solid rgba(255,179,0,0.3); display: none; }
+        .btn-logout-user { background: rgba(213, 0, 0, 0.4); color: #FFCDD2; border: 1px solid rgba(255,255,23,0.3); display: none; }
+        
         .member-details-grid { display: flex; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; margin-top: 6px; }
         .grid-item { flex: 1; text-align: center; }
         .grid-item:first-child { border-right: 1px solid rgba(255,255,255,0.1); }
@@ -223,6 +242,7 @@
     <div class="phone-mockup">
         <div class="phone-notch"></div>
         
+        <!-- 頂部導航欄完美左右分流佈局 -->
         <header class="app-header">
             <span class="header-title">LOHAS STORE</span>
             <span style="font-size:11px; background:rgba(255,255,255,0.2); padding:3px 8px; border-radius:8px; font-weight:500;">樂活智家零售與康復科技</span>
@@ -230,6 +250,7 @@
 
         <div class="toast-msg" id="toastBox">提示訊息</div>
 
+        <!-- 全螢幕加載遮罩層 -->
         <div class="fullscreen-payment-loader" id="paymentFullscreenLoader">
             <div class="spinner-ring" id="ui_spinner"></div>
             <div class="success-checkmark-wrapper" id="ui_checkmark"><span class="checkmark-icon">✓</span></div>
@@ -237,6 +258,7 @@
             <div class="loader-sub-text" id="loaderSubText">請勿關閉頁面或進行中斷操作</div>
         </div>
 
+        <!-- 會員登記彈窗 -->
         <div class="modal-overlay center-style" id="regModalOverlay">
             <div class="reg-modal">
                 <div class="modal-title" style="color:var(--primary-color);">LOHAS 會員登記中心</div>
@@ -254,6 +276,7 @@
             </div>
         </div>
 
+        <!-- 支付結帳彈窗 -->
         <div class="modal-overlay bottom-style" id="paymentModalOverlay">
             <div class="reg-modal">
                 <div class="modal-title">選擇本地安全支付方式</div>
@@ -285,6 +308,7 @@
             </div>
         </div>
 
+        <!-- 收銀台底部精緻滑出面板 -->
         <div class="modal-overlay bottom-drawer-style" id="qrCollectModalOverlay">
             <div class="qr-receipt-box">
                 <div style="font-size:15px; font-weight:bold; color:var(--primary-color);">LOHAS 安全收銀台</div>
@@ -300,6 +324,7 @@
                     需入數總額：<span id="qrModalAmtText" style="font-size:15px; font-weight:bold; color:var(--primary-color);">HK$ 0</span>
                 </div>
 
+                <!-- 雙排平放按鈕外觀 -->
                 <div class="dual-upload-row">
                     <div class="upload-btn-item" id="btn_album_trigger" onclick="triggerSystemSelector('album')">
                         📁 附加相簿檔案
@@ -309,6 +334,7 @@
                     </div>
                 </div>
 
+                <!-- 原生暗中隱藏資料通道 -->
                 <input type="file" class="hidden-system-file-input" id="receiptFileInput" accept="image/*" onchange="handleReceiptFileSelect(event)">
 
                 <div class="receipt-preview-box" id="uiRcptPreviewBox" style="margin-bottom:10px;">
@@ -320,6 +346,7 @@
             </div>
         </div>
 
+        <!-- 最終電子收據票據彈窗 -->
         <div class="modal-overlay center-style" id="receiptModalOverlay">
             <div class="receipt-ticket" id="targetReceiptPrintNode">
                 <div class="receipt-header">
@@ -347,17 +374,21 @@
             </div>
         </div>
 
+        <!-- 主體滑動滾動視窗 -->
         <main class="app-content">
+            <!-- 會員中心數據卡片 -->
             <div class="member-dash-card">
                 <div class="member-info-row">
-                    <div>
-                        <div class="member-name" id="mName">未登入會籍</div>
-                        <div style="font-size: 11px; color: #CFD8DC; margin-top: 2px;" id="mPhone">手機: -</div>
-                    </div>
+                    <!-- 🛠️ 結構優化：按鈕區域移到最上方，並且通過等寬 Flex 佈局迫使字體100%執齊一行出 -->
                     <div class="member-btn-zone">
                         <button class="btn-view-receipt" id="mViewReceiptBtn" onclick="toggleModal('receiptModalOverlay', true)">🧾 睇收據</button>
                         <button class="btn-switch-user" onclick="toggleModal('regModalOverlay', true)">登記 / 切換</button>
                         <button class="btn-logout-user" id="mLogoutBtn" onclick="triggerSignOut()">登出</button>
+                    </div>
+                    <!-- 🛠️ 會員暱稱/電話移至按鈕下方 -->
+                    <div>
+                        <div class="member-name" id="mName">未登入會籍</div>
+                        <div style="font-size: 11px; color: #CFD8DC; margin-top: 2px;" id="mPhone">手機: -</div>
                     </div>
                 </div>
                 <div style="font-size:11px; color:#B0BEC5; margin-bottom:6px;" id="mUID">會員卡號: 未開通</div>
@@ -367,6 +398,7 @@
                 </div>
             </div>
 
+            <!-- 印花收集卡卡片 -->
             <div class="section-title">數位印花收集卡</div>
             <div class="stamp-wallet-card">
                 <div class="stamp-card-header"><span>LOHAS STAMP CARD</span><span>已收集: <span id="stampCountText" style="font-size:14px; color:var(--secondary-color);">0</span> / 10</span></div>
@@ -377,21 +409,25 @@
                 <div class="stamp-card-footer">💡 印花規則：每結帳滿 HK$ 200 自動獲贈 1 個印花</div>
             </div>
 
+            <!-- 動態商品加載牆 -->
             <div class="section-title">貨品</div>
             <div class="products-grid" id="productsWall">
                 <p style="text-align:center; font-size:13px; color:var(--text-light); padding:20px;">📦 正在連接遠端 Firestore 貨物庫...</p>
             </div>
 
+            <!-- 購物車卡片 -->
             <div class="section-title">購物車清單</div>
             <div class="card"><ul id="cart" class="cart-list"><li style="color:var(--text-light); font-style:italic; justify-content:center;">購物車目前無任何項目</li></ul></div>
         </main>
 
+        <!-- 底部結帳固定欄 -->
         <section class="checkout-bar">
             <div><span style="font-size:11px; color:var(--text-light); display:block;">合計應付</span><span id="total" class="summary-amt">HK$ 0</span></div>
             <button class="btn-checkout" id="btnCheckout" onclick="checkout()">立即結帳</button>
         </section>
     </div>
 
+    <!-- Firebase SDK 模組與核心邏輯對接 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, query, where, getDocs, setDoc, runTransaction } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
@@ -426,9 +462,7 @@
         
         let isCompressingImage = false; 
         let activeSelectedBtnType = ""; 
-        
-        // 🔒 全局防競態安全變數保護層：徹底封死 0 元結帳單缺陷
-        let GLOBAL_CURRENT_ORDER_TOTAL = 0;
+        let GLOBAL_CURRENT_ORDER_TOTAL = 0; 
 
         function toast(msg){
             const t = document.getElementById("toastBox");
@@ -471,7 +505,6 @@
             }
         };
 
-        // 🛠️ 1024px Canvas 等比例前端無感強效縮小與壓縮模組 (0.75品質優化)
         window.handleReceiptFileSelect = function(event) {
             const file = event.target.files[0];
             if(!file) return;
@@ -607,7 +640,7 @@
 
         function startUserRealtimeListening(uid) {
             if(unsubscribeUserListener) unsubscribeUserListener();
-            document.getElementById("mLogoutBtn").style.display = "block";
+            document.getElementById("mLogoutBtn").style.display = "flex";
 
             unsubscribeUserListener = onSnapshot(doc(db, "users", uid), (docSnap) => {
                 if(docSnap.exists() && currentUserId !== "") {
@@ -739,7 +772,6 @@
             toggleModal('paymentModalOverlay', true);
         };
 
-        /* ✨ 原子交易：全面修正對接欄位名稱，雙向映射落庫 (完美解決 HK$ 0 與未上傳問題) */
         window.startServerOrderTransaction = async function() {
             const addressInput = document.getElementById("checkoutAddressField").value.trim();
             if(!addressInput) { 
@@ -767,7 +799,6 @@
             const generatedOrderId = "LOHAS-" + new Date().toISOString().slice(0,10).replace(/-/g,"") + "-" + Math.floor(1000 + Math.random() * 9000);
             cachedOrderIdForReceipt = generatedOrderId;
 
-            // ⚡ 延遲 1400 毫秒緩衝，保證大批量異步請求安全順序排隊
             setTimeout(async () => {
                 try {
                     await runTransaction(db, async (transaction) => {
@@ -804,19 +835,18 @@
                         }
                         transaction.update(userRef, { points: newPoints, totalSpent: newSpent, stamps: newStamps, level: newLevel, updatedAt: new Date() });
                         
-                        // 🌟 核心修復：雙重兼顧對齊後台管理流欄位與標準結構欄位
                         const orderRef = doc(db, "orders", generatedOrderId);
                         transaction.set(orderRef, {
                             orderId: generatedOrderId, 
                             uid: currentUserId, 
                             userPhone: currentUserPhone,          
                             items: cart, 
-                            total: GLOBAL_CURRENT_ORDER_TOTAL,       // 🔒 後台統計用
-                            totalAmount: GLOBAL_CURRENT_ORDER_TOTAL, // 🔒 標準欄位用
+                            total: GLOBAL_CURRENT_ORDER_TOTAL,       
+                            totalAmount: GLOBAL_CURRENT_ORDER_TOTAL, 
                             paymentMethod: currentSelectedPay, 
-                            status: "pending_verification",          // 🔒 後台待審核初始狀態
+                            status: "pending_verification",          
                             payment_status: "pending",            
-                            receiptImgBase64: "",                    // 🔒 後台截圖展示專用
+                            receiptImgBase64: "",                    
                             receiptUrl: "",                          
                             merchantPhone: LIVE_MERCHANT_PHONE, 
                             address: finalSavedAddress, 
@@ -848,7 +878,6 @@
             }, 1400);
         };
 
-        /* 第二步：追加上傳過數紙 (100% 寫入雙重影像映射，全面破除未上傳阻截) */
         window.closeQrAndTriggerReceipt = async function() {
             if (isCompressingImage) {
                 alert("⏳ 憑證圖片正在進行核心輕量化壓縮，請稍候一秒再點擊！");
@@ -878,10 +907,9 @@
                 rcptWall.innerHTML += `<div class="receipt-item-line"><span>📦 ${item.name} (x${item.qty})</span><span>HK$ ${item.price * item.qty}</span></div>`;
             });
 
-            // 🔐 核心解鎖同步：同時將資料寫入後台等待的兩個核心圖片映像欄位中！
             try {
                 await setDoc(doc(db, "orders", cachedOrderIdForReceipt), { 
-                    receiptImgBase64: loadedReceiptBase64, // 🌟 同步寫入後台專用欄位
+                    receiptImgBase64: loadedReceiptBase64, 
                     receiptUrl: loadedReceiptBase64       
                 }, { merge: true });
                 console.log("過數紙憑證已成功同步至 Firebase 雲端資料庫。");
@@ -890,11 +918,10 @@
                 console.warn("憑證上載異常：", err.message); 
             }
 
-            document.getElementById("mViewReceiptBtn").style.display = "block";
+            document.getElementById("mViewReceiptBtn").style.display = "flex";
             toggleModal('receiptModalOverlay', true);
             cart = []; renderCart();
 
-            // 啟動加密雲端 WhatsApp 發送
             setTimeout(() => {
                 const cloudReceiptUrl = `https://lohas-care-store.web.app/receipt.html?orderId=${cachedOrderIdForReceipt}`;
                 let waText = `*🟢 LOHAS CARE 訂單建立確認* %0A`;

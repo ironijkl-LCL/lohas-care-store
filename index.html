@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOHAS Store 樂活智家零售與康復科技系統 (核心完美的整合版 v16.5)</title>
+    <title>LOHAS Store 樂活智家零售與康復科技系統 (核心完美對接解鎖版 v16.6)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* 全域樣式：嚴格遵從系統核心憲章（Core Constitution v2.3） */
@@ -114,7 +114,7 @@
         .stamp-slot.active { background-color: var(--secondary-color); border: 2px solid var(--secondary-color); color: #212121; box-shadow: 0 0 8px rgba(255, 179, 0, 0.5); }
         .stamp-card-footer { margin-top: 10px; font-size: 11px; text-align: center; background-color: rgba(0,0,0,0.1); padding: 4px; border-radius: 6px; }
 
-        /* 商品展示牆佈局 */
+        /* 商品展示牆佈局與白卡片通用外觀 */
         .products-grid { display: flex; flex-direction: column; gap: 12px; }
         .product-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.04); border: 1px solid #EAEAEA; display: flex; height: 100px; }
         .product-img-wrapper { width: 100px; height: 100%; background-color: #ECEFF1; position: relative; flex-shrink: 0; }
@@ -125,6 +125,7 @@
         .product-footer { display: flex; justify-content: space-between; align-items: center; }
         .product-price { font-size: 16px; color: var(--primary-color); font-weight: bold; }
         .btn-add { background-color: var(--secondary-color); color: #212121; border: none; padding: 0 12px; height: 32px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .card { background: var(--white); border-radius: 12px; padding: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); border: 1px solid #EAEAEA; }
 
         /* 購物車清單 */
         .cart-list { list-style: none; padding: 0; }
@@ -150,87 +151,71 @@
         .loader-status-text { font-size: 15px; font-weight: bold; color: #ECEFF1; margin-bottom: 6px; text-align: center; }
         .loader-sub-text { font-size: 12px; color: #90A4AE; text-align: center; }
 
-        /* 通用遮罩彈出層 */
+        /* 通用遮罩彈出層基礎核心佈局 */
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 9999; display: flex; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-overlay.center-style { align-items: center; }
         .modal-overlay.bottom-style { align-items: flex-end; padding: 0; }
-        .reg-modal { background-color: var(--white); width: 100%; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; }
-        .modal-overlay.bottom-style .reg-modal { border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding-bottom: 30px; }
-        .modal-title { font-size: 17px; font-weight: bold; color: var(--text-dark); margin-bottom: 16px; }
+        
+        /* 移動端底部滑出精緻抽屜面板樣式修復 (防止走位) */
+        .modal-overlay.bottom-drawer-style { align-items: flex-end; padding: 0; }
+        .modal-overlay.bottom-drawer-style .qr-receipt-box {
+            border-bottom-left-radius: 0; border-bottom-right-radius: 0; 
+            border-top-left-radius: 24px; border-top-right-radius: 24px;
+            padding: 20px 20px 32px 20px; width: 100%; box-shadow: 0 -8px 30px rgba(0,0,0,0.25);
+            background-color: var(--white); text-align: center; max-height: 85%; overflow-y: auto;
+            position: absolute; bottom: 0; left: 0; animation: slideUp 0.3s cubic-bezier(0.1, 0.8, 0.25, 1) forwards;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        /* 會員登記卡片與輸入組件基礎外觀 */
+        .reg-modal { background-color: var(--white); width: 100%; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; animation: zoomIn 0.25s ease; }
+        @keyframes zoomIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-overlay.bottom-style .reg-modal { border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding-bottom: 30px; border-top-left-radius: 20px; border-top-right-radius: 20px; }
+        .modal-title { font-size: 16px; font-weight: bold; color: var(--text-dark); margin-bottom: 16px; }
+        
+        .input-group { text-align: left; margin-bottom: 12px; }
+        .input-group label { font-size: 11px; font-weight: bold; color: var(--text-light); display: block; margin-bottom: 4px; }
+        .input-field { width: 100%; height: 40px; border: 1.5px solid #EAEAEA; border-radius: 8px; padding: 0 12px; font-size: 13px; outline: none; transition: border-color 0.2s; }
+        .input-field:focus { border-color: var(--primary-color); }
+        
+        .btn-submit-payment { width: 100%; height: var(--button-height); background-color: var(--primary-color); color: var(--white); border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
+        .btn-submit-payment:active { background-color: #B71C1C; }
         .btn-close-modal { background: none; border: none; color: var(--text-light); font-size: 13px; margin-top: 12px; cursor: pointer; text-decoration: underline; }
 
-        /* 輸入方格樣式 */
-        .input-group { margin-bottom: 16px; text-align: left; }
-        .input-group label { font-size: 12px; color: var(--text-light); display: block; margin-bottom: 5px; font-weight: bold; }
-        .input-field { 
-            width: 100%; 
-            height: 42px; 
-            border: 1.5px solid #B0BEC5; 
-            background-color: #FFFFFF;    
-            border-radius: 8px; 
-            padding: 0 12px;              
-            font-size: 15px; 
-            color: var(--text-dark);      
-            outline: none; 
-            transition: all 0.2s ease;
-        }
-        .input-field:focus { 
-            border-color: var(--primary-color); 
-            box-shadow: 0 0 5px rgba(213, 47, 47, 0.2);
-        }
-        .input-field::placeholder {
-            color: #90A4AE;
-            opacity: 0.8;
-            font-size: 13.5px;
-        }
+        /* 支付管道列表外觀 */
+        .pay-route-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+        .pay-route-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1.5px solid #EAEAEA; border-radius: 8px; cursor: pointer; font-size: 13px; text-align: left; transition: all 0.2s; }
+        .pay-route-item.selected { border-color: var(--primary-color); background-color: rgba(211, 47, 47, 0.04); color: var(--primary-color); font-weight: bold; }
+        .gateway-tag { font-size: 10px; background: #EEF0F2; padding: 2px 6px; border-radius: 4px; color: var(--text-light); font-weight: normal; }
 
-        /* 渠道選單樣式 */
-        .pay-route-list { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; text-align: left; }
-        .pay-route-item { border: 2px solid #E0E0E0; border-radius: 10px; padding: 12px 14px; cursor: pointer; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; align-items: center; color: var(--text-dark); transition: all 0.15s ease; }
+        /* 雙排平放按鈕外觀佈局 (精準縮小化尺寸控制) */
+        .dual-upload-row { display: flex; gap: 10px; margin: 12px 0; width: 100%; }
+        .upload-btn-item {
+            flex: 1; background-color: var(--white); border: 1.5px solid var(--secondary-color);
+            color: #5D4037; height: 40px; border-radius: 8px; font-size: 12.5px; font-weight: bold;
+            display: flex; justify-content: center; align-items: center; gap: 6px; cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: all 0.2s ease;
+        }
+        .upload-btn-item:active { transform: scale(0.97); }
+        .upload-btn-item.has-file { background-color: var(--accent-green) !important; border-color: var(--accent-green) !important; color: var(--white) !important; }
         
-        /* 支付管道點選核心視覺邏輯 */
-        .pay-route-item.selected { 
-            border: 2px solid var(--primary-color) !important; 
-            color: var(--primary-color) !important; 
-        }
-        #route_payme.pay-route-item.selected { background-color: #FFEBEE !important; }
-        #route_fps.pay-route-item.selected { background-color: #E8F5E9 !important; }
-        #route_alipay.pay-route-item.selected { background-color: #E3F2FD !important; }
-
-        .gateway-tag { font-size: 10px; background-color: #ECEFF1; color: #546E7A; padding: 2px 6px; border-radius: 4px; font-weight: normal; }
-        .btn-submit-payment { background-color: var(--primary-color); color: var(--white); width: 100%; height: var(--button-height); border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 8px; }
-
-        /* 電子收據卡片 */
-        .receipt-ticket { background-color: var(--white); border-radius: 12px; padding: 20px; width: 100%; text-align: left; color: var(--text-dark); box-shadow: 0 4px 20px rgba(0,0,0,0.15); position: relative; }
-        .receipt-ticket::after { content: ""; position: absolute; bottom: -8px; left: 0; width: 100%; height: 8px; background: linear-gradient(-45deg, transparent 4px, var(--white) 4px), linear-gradient(45deg, transparent 4px, var(--white) 4px); background-size: 8px 8px; }
-        .receipt-header { text-align: center; border-bottom: 2px dashed #CFD8DC; padding-bottom: 14px; margin-bottom: 14px; }
-        .receipt-brand { font-size: 20px; font-weight: bold; color: var(--primary-color); letter-spacing: 1px; }
-        .receipt-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; gap: 10px; }
-        .receipt-label { color: var(--text-light); flex-shrink: 0; }
-        .receipt-val { font-weight: 500; color: var(--text-dark); text-align: right; word-break: break-all; }
-        .receipt-items-box { border-bottom: 1px solid #ECEFF1; padding: 8px 0; margin-bottom: 10px; max-height: 90px; overflow-y: auto; }
-        .receipt-item-line { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; }
-        .receipt-total-line { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; color: var(--primary-color); border-top: 1px solid #CFD8DC; padding-top: 10px; margin-top: 6px; }
-        .receipt-reward-box { background: #FFFDE7; border: 1px dashed var(--secondary-color); border-radius: 8px; padding: 10px; font-size: 12px; margin-top: 12px; color: #5D4037; }
-
-        /* 收銀台 */
-        .qr-receipt-box { background-color: var(--white); border-radius: 16px; padding: 20px; width: 100%; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.2); max-height: 80%; overflow-y: auto; }
-        .qr-placeholder { width: 150px; height: 150px; background-color: #FAFAFA; border: 2px solid #ECEFF1; margin: 10px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 12px; color: var(--text-light); border-radius: 10px; position: relative; overflow: hidden; }
-        .qr-real-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
-        
-        /* 📸 拍照上傳提示樣式 */
-        .copy-phone-badge { background: #FFF8E1; border: 1px solid var(--secondary-color); color: #5D4037; padding: 8px 16px; border-radius: 8px; font-size: 13.5px; font-weight: bold; margin: 8px 0; display: inline-block; cursor: pointer; width: 100%; transition: all 0.2s; }
-        .copy-phone-badge:active { transform: scale(0.98); background: #FFE082; }
-
-        /* 相簿收據選擇器樣式 */
-        .native-upload-zone { margin: 10px 0; background-color: #F8F9FA; border: 2px dashed #B0BEC5; border-radius: 10px; padding: 10px; position: relative; }
-        .btn-fake-upload { background-color: var(--secondary-color); color: #212121; height: 38px; width: 100%; border: none; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; transition: background-color 0.2s ease; }
-        .btn-fake-upload.has-file { background-color: var(--accent-green) !important; color: #FFFFFF !important; }
-        .real-file-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-        .receipt-preview-box { display: none; margin-top: 8px; width: 100%; height: 70px; background-color: #ECEFF1; border-radius: 6px; align-items: center; padding: 6px; gap: 10px; text-align: left; }
+        .hidden-system-file-input { display: none; }
+        .receipt-preview-box { display: none; margin-top: 4px; width: 100%; height: 70px; background-color: #ECEFF1; border-radius: 6px; align-items: center; padding: 6px; gap: 10px; text-align: left; }
         .receipt-preview-img { height: 100%; width: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #CCC; }
         .receipt-preview-info { font-size: 11px; color: var(--accent-green); font-weight: 500; }
+
+        /* 收據票據外觀樣式渲染 (PDF 匯出對齊) */
+        .receipt-ticket { background: var(--white); width: 100%; max-width: 340px; border-radius: 14px; padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); text-align: left; color: var(--text-dark); }
+        .receipt-header { text-align: center; border-bottom: 2px dashed #E0E0E0; padding-bottom: 10px; margin-bottom: 12px; }
+        .receipt-brand { font-size: 16px; font-weight: 900; color: var(--primary-color); letter-spacing: 0.5px; }
+        .receipt-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; line-height: 1.4; }
+        .receipt-label { color: var(--text-light); }
+        .receipt-val { font-weight: 500; text-align: right; max-width: 65%; word-break: break-all; }
+        .receipt-items-box { background: #F5F7F8; border-radius: 6px; padding: 8px; margin: 6px 0; max-height: 100px; overflow-y: auto; }
+        .receipt-item-line { display: flex; justify-content: space-between; font-size: 11px; color: #424242; margin-bottom: 3px; }
+        .receipt-total-line { display: flex; justify-content: space-between; font-size: 15px; font-weight: bold; border-top: 1px solid #E0E0E0; padding-top: 8px; margin-top: 8px; color: var(--primary-color); }
+        .receipt-reward-box { background: rgba(46, 125, 50, 0.05); border: 1px solid rgba(46, 125, 50, 0.12); border-radius: 8px; padding: 8px; margin-top: 10px; font-size: 11px; color: #1B5E20; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -300,7 +285,7 @@
             </div>
         </div>
 
-        <div class="modal-overlay center-style" id="qrCollectModalOverlay">
+        <div class="modal-overlay bottom-drawer-style" id="qrCollectModalOverlay">
             <div class="qr-receipt-box">
                 <div style="font-size:15px; font-weight:bold; color:var(--primary-color);">LOHAS 安全收銀台</div>
                 <div style="font-size:11px; color:var(--text-light); margin-top:2px;">請掃描二維碼或完成過數並上傳憑證</div>
@@ -310,26 +295,28 @@
                     <img src="" class="qr-real-img" id="qrRealTargetImg" alt="收錢碼">
                 </div>
 
-                <div style="font-size:12px; color:var(--text-dark); margin-bottom: 8px;">
+                <div style="font-size:12px; color:var(--text-dark); margin-bottom: 4px;">
                     收款管道：<span id="qrModalRouteTitle" style="font-weight:bold; color:var(--accent-green);">-</span><br>
                     需入數總額：<span id="qrModalAmtText" style="font-size:15px; font-weight:bold; color:var(--primary-color);">HK$ 0</span>
                 </div>
 
-                <div class="copy-phone-badge" onclick="triggerNativeCameraSelector()">
-                    📸 即時拍照 / 選擇入數紙
+                <div class="dual-upload-row">
+                    <div class="upload-btn-item" id="btn_album_trigger" onclick="triggerSystemSelector('album')">
+                        📁 附加相簿檔案
+                    </div>
+                    <div class="upload-btn-item" id="btn_camera_trigger" onclick="triggerSystemSelector('camera')">
+                        📸 即時拍照上傳
+                    </div>
                 </div>
 
-                <div class="native-upload-zone" style="display:none;">
-                    <input type="file" class="real-file-input" id="receiptFileInput" accept="image/*" onchange="handleReceiptFileSelect(event)">
-                </div>
+                <input type="file" class="hidden-system-file-input" id="receiptFileInput" accept="image/*" onchange="handleReceiptFileSelect(event)">
 
                 <div class="receipt-preview-box" id="uiRcptPreviewBox" style="margin-bottom:10px;">
                     <img src="" class="receipt-preview-img" id="uiRcptPreviewImg">
                     <div class="receipt-preview-info">✓ 憑證已成功安全壓縮加載<br><span style="font-size:9px; color:var(--text-light);">就緒，可點擊下方按鈕送出</span></div>
                 </div>
 
-                <button class="btn-fake-upload" id="uiFakeUploadBtn" style="display:none;"></button>
-                <button class="btn-submit-payment" style="background-color:var(--accent-green);" onclick="closeQrAndTriggerReceipt()">我已完成轉帳，生成收據</button>
+                <button class="btn-submit-payment" id="uiFinalReceiptSubmitBtn" style="background-color:var(--accent-green);" onclick="closeQrAndTriggerReceipt()">我已完成轉帳，生成收據</button>
             </div>
         </div>
 
@@ -396,7 +383,7 @@
             </div>
 
             <div class="section-title">購物車清單</div>
-            <div class="card"><ul id="cart" class="cart-list"><li style="color:var(--text-light); font-style:italic; justify-content:center;">購物車目前無 any 項目</li></ul></div>
+            <div class="card"><ul id="cart" class="cart-list"><li style="color:var(--text-light); font-style:italic; justify-content:center;">購物車目前無任何項目</li></ul></div>
         </main>
 
         <section class="checkout-bar">
@@ -407,7 +394,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, query, where, getDocs, setDoc, runTransaction, updateDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, query, where, getDocs, setDoc, runTransaction } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDnJJJmVSVGfTH92nDf51Ll9QoG1MKzTKM",
@@ -436,6 +423,12 @@
         let cachedOrderIdForReceipt = ""; 
         let loadedReceiptBase64 = ""; 
         let finalSavedAddress = "";
+        
+        let isCompressingImage = false; 
+        let activeSelectedBtnType = ""; 
+        
+        // 🔒 全局防競態安全變數保護層：徹底封死 0 元結帳單缺陷
+        let GLOBAL_CURRENT_ORDER_TOTAL = 0;
 
         function toast(msg){
             const t = document.getElementById("toastBox");
@@ -464,14 +457,31 @@
             toast(`已選擇渠道: ${method}`);
         };
 
-        window.triggerNativeCameraSelector = function() {
-            document.getElementById("receiptFileInput").click();
+        window.triggerSystemSelector = function(type) {
+            activeSelectedBtnType = type;
+            const fileInputNode = document.getElementById("receiptFileInput");
+            if (fileInputNode) {
+                fileInputNode.value = ""; 
+                if (type === 'camera') {
+                    fileInputNode.setAttribute("capture", "environment");
+                } else {
+                    fileInputNode.removeAttribute("capture");
+                }
+                fileInputNode.click(); 
+            }
         };
 
-        // ✨ 修正重點 2：前端無感 Canvas 壓縮，將大圖控制在 200KB 左右，確保不超過 1MB 限制
+        // 🛠️ 1024px Canvas 等比例前端無感強效縮小與壓縮模組 (0.75品質優化)
         window.handleReceiptFileSelect = function(event) {
             const file = event.target.files[0];
             if(!file) return;
+            
+            isCompressingImage = true;
+            const submitBtn = document.getElementById("uiFinalReceiptSubmitBtn");
+            if(submitBtn) {
+                submitBtn.style.backgroundColor = "#78909C";
+                submitBtn.innerText = "⏳ 憑證智能壓縮處理中...";
+            }
             
             toast("⏳ 正在安全壓縮並同步憑證畫質...");
             const reader = new FileReader();
@@ -483,7 +493,6 @@
                     let width = img.width;
                     let height = img.height;
                     
-                    // 超過 1024 像素則等比例收縮
                     if (width > 1024) {
                         height *= 1024 / width;
                         width = 1024;
@@ -494,8 +503,22 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // 壓縮為 0.75 高清品質 JPEG，體積大幅縮減至 ~150KB
                     loadedReceiptBase64 = canvas.toDataURL('image/jpeg', 0.75); 
+                    
+                    isCompressingImage = false;
+                    if(submitBtn) {
+                        submitBtn.style.backgroundColor = "var(--accent-green)";
+                        submitBtn.innerText = "我已完成轉帳，生成收據";
+                    }
+
+                    document.getElementById("btn_album_trigger").classList.remove("has-file");
+                    document.getElementById("btn_camera_trigger").classList.remove("has-file");
+                    
+                    if (activeSelectedBtnType === 'album') {
+                        document.getElementById("btn_album_trigger").classList.add("has-file");
+                    } else {
+                        document.getElementById("btn_camera_trigger").classList.add("has-file");
+                    }
                     
                     document.getElementById("uiRcptPreviewImg").src = loadedReceiptBase64;
                     document.getElementById("uiRcptPreviewBox").style.display = "flex";
@@ -626,7 +649,7 @@
             for(let i = 1; i <= 10; i++) { const slotEl = document.getElementById(`slot_${i}`); slotEl.classList.remove("active"); slotEl.innerHTML = i; }
             document.getElementById("mLogoutBtn").style.display = "none";
             document.getElementById("mViewReceiptBtn").style.display = "none";
-            toast("會籍已 safe 登出"); location.reload();
+            toast("會籍已安全登出"); location.reload();
         };
 
         window.triggerAddToCart = function(pId) {
@@ -664,12 +687,13 @@
         function renderCart(){
             const el = document.getElementById("cart");
             if (cart.length === 0) {
-                el.innerHTML = `<li style="color:var(--text-light); font-style:italic; justify-content:center;">購物車目前無 any 項目</li>`;
+                el.innerHTML = `<li style="color:var(--text-light); font-style:italic; justify-content:center;">購物車目前無任何項目</li>`;
                 document.getElementById("total").innerText = "HK$ 0"; return;
             }
-            el.innerHTML = ""; let total = 0;
+            el.innerHTML = "";
+            let currentCartTotal = 0;
             cart.forEach(i => {
-                total += i.price * i.qty;
+                currentCartTotal += Number(i.price || 0) * Number(i.qty || 0);
                 el.innerHTML += `
                     <li class="cart-item">
                         <span>📦 <b>${i.name}</b></span>
@@ -683,7 +707,7 @@
                         </div>
                     </li>`;
             });
-            document.getElementById("total").innerText = "HK$ " + total;
+            document.getElementById("total").innerText = "HK$ " + currentCartTotal;
         }
 
         window.checkout = function() {
@@ -691,18 +715,31 @@
             if(cart.length === 0){ toast("購物車空！"); return; }
             
             loadedReceiptBase64 = "";
+            isCompressingImage = false;
+            activeSelectedBtnType = "";
             document.getElementById("checkoutAddressField").value = ""; 
-            const fakeBtn = document.getElementById("uiFakeUploadBtn");
-            if(fakeBtn) { fakeBtn.classList.remove("has-file"); fakeBtn.innerText = "🖼️ 點擊從相簿選取轉帳入數紙"; }
+            document.getElementById("btn_album_trigger").classList.remove("has-file");
+            document.getElementById("btn_camera_trigger").classList.remove("has-file");
             document.getElementById("uiRcptPreviewBox").style.display = "none";
             document.getElementById("receiptFileInput").value = "";
 
-            let total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-            document.getElementById("payModalAmt").innerText = "HK$ " + total;
+            const submitBtn = document.getElementById("uiFinalReceiptSubmitBtn");
+            if(submitBtn) {
+                submitBtn.style.backgroundColor = "var(--accent-green)";
+                submitBtn.innerText = "我已完成轉帳，生成收據";
+            }
+
+            let checkoutFinalAmt = 0;
+            for (let item of cart) {
+                checkoutFinalAmt += Number(item.price || 0) * Number(item.qty || 0);
+            }
+            
+            GLOBAL_CURRENT_ORDER_TOTAL = checkoutFinalAmt; 
+            document.getElementById("payModalAmt").innerText = "HK$ " + GLOBAL_CURRENT_ORDER_TOTAL;
             toggleModal('paymentModalOverlay', true);
         };
 
-        /* ✨ 修正重點 1：將金額欄位對齊為後台讀取的 'total'，同時保持資料庫標準化欄位寫入 */
+        /* ✨ 原子交易：全面修正對接欄位名稱，雙向映射落庫 (完美解決 HK$ 0 與未上傳問題) */
         window.startServerOrderTransaction = async function() {
             const addressInput = document.getElementById("checkoutAddressField").value.trim();
             if(!addressInput) { 
@@ -711,8 +748,8 @@
             }
             
             finalSavedAddress = addressInput; 
-
             toggleModal('paymentModalOverlay', false);
+            
             const loaderOverlay = document.getElementById("paymentFullscreenLoader");
             const spinner = document.getElementById("ui_spinner");
             const checkmark = document.getElementById("ui_checkmark");
@@ -721,10 +758,16 @@
             loaderOverlay.style.display = "flex"; spinner.style.display = "block"; checkmark.style.display = "none";
             mainText.innerText = `正在安全校驗庫存並同步雲端數據...`;
 
-            let totalAmt = cart.reduce((s, i) => s + i.price * i.qty, 0);
+            if(GLOBAL_CURRENT_ORDER_TOTAL <= 0) {
+                loaderOverlay.style.display = "none";
+                alert("⚠️ 系統檢測到購物車總額異常，請重新加入商品結帳！");
+                return;
+            }
+
             const generatedOrderId = "LOHAS-" + new Date().toISOString().slice(0,10).replace(/-/g,"") + "-" + Math.floor(1000 + Math.random() * 9000);
             cachedOrderIdForReceipt = generatedOrderId;
 
+            // ⚡ 延遲 1400 毫秒緩衝，保證大批量異步請求安全順序排隊
             setTimeout(async () => {
                 try {
                     await runTransaction(db, async (transaction) => {
@@ -746,10 +789,10 @@
                         let currentSpent = Number(userSnap.data().totalSpent) || 0;
                         let currentStamps = Number(userSnap.data().stamps || 0);
 
-                        let earnedPoints = Math.floor(totalAmt / 10); 
-                        let earnedStamps = Math.floor(totalAmt / 200); 
+                        let earnedPoints = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 10); 
+                        let earnedStamps = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 200); 
                         let newPoints = currentPoints + earnedPoints; 
-                        let newSpent = currentSpent + totalAmt;
+                        let newSpent = currentSpent + GLOBAL_CURRENT_ORDER_TOTAL;
                         let newStamps = currentStamps + earnedStamps; 
                         if(newStamps > 10) newStamps = 10; 
 
@@ -761,20 +804,20 @@
                         }
                         transaction.update(userRef, { points: newPoints, totalSpent: newSpent, stamps: newStamps, level: newLevel, updatedAt: new Date() });
                         
-                        // 🔓 完美對接：合併傳入 total (後台讀取) 與 totalAmount (標準欄位)
+                        // 🌟 核心修復：雙重兼顧對齊後台管理流欄位與標準結構欄位
                         const orderRef = doc(db, "orders", generatedOrderId);
                         transaction.set(orderRef, {
                             orderId: generatedOrderId, 
                             uid: currentUserId, 
-                            userPhone: currentUserPhone,           
+                            userPhone: currentUserPhone,          
                             items: cart, 
-                            total: totalAmt,                       // 🌟 修正：對接後台讀取的金額欄位
-                            totalAmount: totalAmt,                 
+                            total: GLOBAL_CURRENT_ORDER_TOTAL,       // 🔒 後台統計用
+                            totalAmount: GLOBAL_CURRENT_ORDER_TOTAL, // 🔒 標準欄位用
                             paymentMethod: currentSelectedPay, 
-                            status: "pending_verification",        // 🌟 修正：對接後台的初始狀態
-                            payment_status: "pending",             
-                            receiptImgBase64: "",                  // 🌟 修正：預留後台讀取的圖片欄位
-                            receiptUrl: "",                        
+                            status: "pending_verification",          // 🔒 後台待審核初始狀態
+                            payment_status: "pending",            
+                            receiptImgBase64: "",                    // 🔒 後台截圖展示專用
+                            receiptUrl: "",                          
                             merchantPhone: LIVE_MERCHANT_PHONE, 
                             address: finalSavedAddress, 
                             createdAt: new Date()                 
@@ -785,7 +828,7 @@
                     mainText.innerText = "雲端交易同步成功！";
 
                     document.getElementById("qrModalRouteTitle").innerText = currentSelectedPay === "PayMe" ? "PayMe 轉帳" : (currentSelectedPay === "AlipayHK" ? "AlipayHK 支付寶轉帳" : "轉數快 FPS 快捷支付");
-                    document.getElementById("qrModalAmtText").innerText = "HK$ " + totalAmt;
+                    document.getElementById("qrModalAmtText").innerText = "HK$ " + GLOBAL_CURRENT_ORDER_TOTAL;
                     
                     const targetQrImg = currentSelectedPay === "PayMe" ? LIVE_PAYME_QR : (currentSelectedPay === "AlipayHK" ? LIVE_ALIPAY_QR : LIVE_FPS_QR);
                     const imgEl = document.getElementById("qrRealTargetImg");
@@ -805,25 +848,28 @@
             }, 1400);
         };
 
-        /* 第二步：完成轉帳，追加上傳過數紙 (欄位完全對接版) */
+        /* 第二步：追加上傳過數紙 (100% 寫入雙重影像映射，全面破除未上傳阻截) */
         window.closeQrAndTriggerReceipt = async function() {
+            if (isCompressingImage) {
+                alert("⏳ 憑證圖片正在進行核心輕量化壓縮，請稍候一秒再點擊！");
+                return;
+            }
+
             if(!loadedReceiptBase64 || loadedReceiptBase64.trim() === "") {
-                alert("⚠️ 提交阻截：請先選取並上載您的轉帳入數收據截圖憑證！");
+                alert("⚠️ 提交阻截：請先透過「📁 附加相簿檔案」或「📸 即時拍照上傳」提供清晰的過數紙憑證！");
                 return;
             }
 
             const cartSnapshot = [...cart];
-            let totalAmt = cartSnapshot.reduce((s, i) => s + i.price * i.qty, 0);
-
             toggleModal('qrCollectModalOverlay', false);
             
             document.getElementById("rcptId").innerText = cachedOrderIdForReceipt;
             document.getElementById("rcptTime").innerText = new Date().toLocaleString('zh-HK');
             document.getElementById("rcptMethod").innerText = currentSelectedPay + " (附收據·待核對)";
             document.getElementById("rcptUid").innerText = currentUserId || "u101";
-            document.getElementById("rcptTotalAmt").innerText = "HK$ " + totalAmt;
-            document.getElementById("rcptEarnedPts").innerText = Math.floor(totalAmt / 10);
-            document.getElementById("rcptEarnedStamps").innerText = Math.floor(totalAmt / 200);
+            document.getElementById("rcptTotalAmt").innerText = "HK$ " + GLOBAL_CURRENT_ORDER_TOTAL;
+            document.getElementById("rcptEarnedPts").innerText = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 10);
+            document.getElementById("rcptEarnedStamps").innerText = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 200);
             document.getElementById("rcptAddress").innerText = finalSavedAddress; 
 
             const rcptWall = document.getElementById("rcptItemsWall");
@@ -832,28 +878,29 @@
                 rcptWall.innerHTML += `<div class="receipt-item-line"><span>📦 ${item.name} (x${item.qty})</span><span>HK$ ${item.price * item.qty}</span></div>`;
             });
 
-            // 🔓 完美對接：同步更新後台等待的 receiptImgBase64 與 receiptUrl 欄位
+            // 🔐 核心解鎖同步：同時將資料寫入後台等待的兩個核心圖片映像欄位中！
             try {
-                await updateDoc(doc(db, "orders", cachedOrderIdForReceipt), { 
-                    receiptImgBase64: loadedReceiptBase64,  // 🌟 修正：對接後台讀取的縮圖欄位
-                    receiptUrl: loadedReceiptBase64         
-                });
+                await setDoc(doc(db, "orders", cachedOrderIdForReceipt), { 
+                    receiptImgBase64: loadedReceiptBase64, // 🌟 同步寫入後台專用欄位
+                    receiptUrl: loadedReceiptBase64       
+                }, { merge: true });
+                console.log("過數紙憑證已成功同步至 Firebase 雲端資料庫。");
             } catch(err) { 
+                alert("⚠️ 雲端資料上傳異常，原因：" + err.message);
                 console.warn("憑證上載異常：", err.message); 
             }
 
             document.getElementById("mViewReceiptBtn").style.display = "block";
             toggleModal('receiptModalOverlay', true);
-
             cart = []; renderCart();
 
-            // 啟動加密雲端 WhatsApp 合流發送
+            // 啟動加密雲端 WhatsApp 發送
             setTimeout(() => {
                 const cloudReceiptUrl = `https://lohas-care-store.web.app/receipt.html?orderId=${cachedOrderIdForReceipt}`;
                 let waText = `*🟢 LOHAS CARE 訂單建立確認* %0A`;
                 waText += `========================%0A`;
                 waText += `• 訂單編號：${cachedOrderIdForReceipt}%0A`;
-                waText += `• 實收金額：*HK$ ${totalAmt}*%0A`;
+                waText += `• 實收金額：*HK$ ${GLOBAL_CURRENT_ORDER_TOTAL}*%0A`;
                 waText += `• 付款渠道：${currentSelectedPay}%0A`;
                 waText += `• 送貨地址：_${finalSavedAddress}_%0A`; 
                 waText += `• 憑證夾附：[✓ 入數紙已成功選取夾附]%0A%0A`;

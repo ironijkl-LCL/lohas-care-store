@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOHAS Store 樂活智家零售與康復科技系統 (核心自由配置版 v16.9)</title>
+    <title>LOHAS Store 樂活智家零售與康復科技系統 (核心自由配置版 v17.0)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* 全域樣式：嚴格遵從系統核心憲章（Core Constitution v2.3） */
@@ -253,7 +253,7 @@
         <div class="fullscreen-payment-loader" id="paymentFullscreenLoader">
             <div class="spinner-ring" id="ui_spinner"></div>
             <div class="success-checkmark-wrapper" id="ui_checkmark"><span class="checkmark-icon">✓</span></div>
-            <div class="loader-status-text" id="loaderMainText">正在安全連接支付閘道...</div>
+            <div class="loader-status-text" id="loaderMainText">正在傳輸數據並同步雲端交易...</div>
             <div class="loader-sub-text" id="loaderSubText">請勿關閉頁面或進行中斷操作</div>
         </div>
 
@@ -299,7 +299,7 @@
                     </div>
                 </div>
                 
-                <button class="btn-submit-payment" onclick="startServerOrderTransaction()">安全確認付款並獲取收款碼</button>
+                <button class="btn-submit-payment" onclick="prepareLocalOrderTransaction()">安全確認付款並獲取收款碼</button>
                 <br>
                 <button class="btn-close-modal" onclick="toggleModal('paymentModalOverlay', false)">取消付款</button>
             </div>
@@ -336,7 +336,7 @@
                     <div class="receipt-preview-info">✓ 憑證已成功安全壓縮加載<br><span style="font-size:9px; color:var(--text-light);">就緒，可點擊下方按鈕送出</span></div>
                 </div>
 
-                <button class="btn-submit-payment" id="uiFinalReceiptSubmitBtn" style="background-color:var(--accent-green);" onclick="closeQrAndTriggerReceipt()">我已完成轉帳，生成收據</button>
+                <button class="btn-submit-payment" id="uiFinalReceiptSubmitBtn" style="background-color:var(--accent-green);" onclick="submitOrderWithReceiptToServer()">我已完成轉帳，生成收據</button>
                 <button class="btn-close-modal" style="margin-top: 14px; font-size: 13px;" onclick="toggleModal('qrCollectModalOverlay', false)">❌ 取消付款並返回商店</button>
             </div>
         </div>
@@ -559,23 +559,19 @@
             html2pdf().set(opt).from(element).save();
         };
 
-        // 🛠️ 核心解析引擎：自動完美將 gs:// 內部路徑翻譯為標準 https:// 公網長網址
         function convertGsToHttp(gsUrl) {
             if (!gsUrl || typeof gsUrl !== 'string') return '';
             if (gsUrl.startsWith('gs://')) {
-                // 去除 gs:// 並分離 Bucket 名稱與檔案路徑
                 const pathContent = gsUrl.replace('gs://', '');
                 const firstSlashIdx = pathContent.indexOf('/');
                 if (firstSlashIdx === -1) return '';
                 
                 const bucketName = pathContent.substring(0, firstSlashIdx);
                 const filePath = pathContent.substring(firstSlashIdx + 1);
-                
-                // 進行百分號安全編碼（處理空白與特殊字元）
                 const encodedPath = encodeURIComponent(filePath);
                 return `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodedPath}?alt=media`;
             }
-            return gsUrl; // 如果本身就是 http 網址或本地檔名，直接原樣回傳
+            return gsUrl;
         }
 
         window.handleQrLoadError = function(imgElement) {
@@ -592,12 +588,9 @@
                 if(docSnap.exists()) {
                     const payConfig = docSnap.data();
                     LIVE_MERCHANT_PHONE = payConfig.merchantPhone || "91234567";
-                    
-                    // 🛠️ 封裝動態翻譯層，即時接管並編譯
                     LIVE_PAYME_QR = convertGsToHttp(payConfig.paymeQrUrl || "");
                     LIVE_ALIPAY_QR = convertGsToHttp(payConfig.alipayQrUrl || ""); 
                     LIVE_FPS_QR = convertGsToHttp(payConfig.fpsQrUrl || "");
-                    console.log("🔄 雲端私有路徑實時自動編譯完成:", { LIVE_PAYME_QR, LIVE_ALIPAY_QR, LIVE_FPS_QR });
                 }
             });
 
@@ -775,34 +768,71 @@
             toggleModal('paymentModalOverlay', true);
         };
 
-        window.startServerOrderTransaction = async function() {
+        /* 🛠️ 核心修正：第一階段（安全確認付款）改為「僅本地緩存定格」，絕不輸送出任何數據到 Firestore */
+        window.prepareLocalOrderTransaction = function() {
             const addressInput = document.getElementById("checkoutAddressField").value.trim();
             if(!addressInput) { alert("⚠️ 請先填妥詳細的送貨地址！"); return; }
             
             finalSavedAddress = addressInput; 
             toggleModal('paymentModalOverlay', false);
             
+            // 本地動態預先定格唯一的訂單編號
+            cachedOrderIdForReceipt = "LOHAS-" + new Date().toISOString().slice(0,10).replace(/-/g,"") + "-" + Math.floor(1000 + Math.random() * 9000);
+
+            document.getElementById("qrModalRouteTitle").innerText = currentSelectedPay === "PayMe" ? "PayMe 轉帳" : (currentSelectedPay === "AlipayHK" ? "AlipayHK 轉帳" : "轉數快 FPS 快捷支付");
+            document.getElementById("qrModalAmtText").innerText = "HK$ " + GLOBAL_CURRENT_ORDER_TOTAL;
+            
+            let targetQrImg = currentSelectedPay === "PayMe" ? LIVE_PAYME_QR : (currentSelectedPay === "AlipayHK" ? LIVE_ALIPAY_QR : LIVE_FPS_QR);
+            const imgEl = document.getElementById("qrRealTargetImg");
+            const tipEl = document.getElementById("qrTextTip");
+
+            if(targetQrImg && targetQrImg.trim() !== "") {
+                if(tipEl) tipEl.style.display = "none";
+                imgEl.src = targetQrImg; 
+                imgEl.style.display = "block";
+            } else { 
+                imgEl.style.display = "none"; 
+                if(tipEl) {
+                    tipEl.innerText = "❌ 後台尚未配置收款二維碼網址";
+                    tipEl.style.display = "block";
+                }
+            }
+            
+            // 本地定格完成，直接開啟安全收銀台抽屜
+            toggleModal('qrCollectModalOverlay', true);
+        };
+
+        /* 🛠️ 核心修正：第二階段（撳生成收據鍵）此處執行真實的雲端原子交易，100% 綁定入數紙憑證輸送出 */
+        window.submitOrderWithReceiptToServer = async function() {
+            if (isCompressingImage) { alert("⏳ 憑證圖片壓縮中，請稍候..."); return; }
+            if(!loadedReceiptBase64 || loadedReceiptBase64.trim() === "") { 
+                alert("⚠️ 提交阻截：請先透過「📁 附加相簿檔案」或「📸 即時拍照上傳」提供清晰的銀行入數紙憑證！"); 
+                return; 
+            }
+
+            const cartSnapshot = [...cart];
+            toggleModal('qrCollectModalOverlay', false);
+            
             const loaderOverlay = document.getElementById("paymentFullscreenLoader");
             const spinner = document.getElementById("ui_spinner");
             const checkmark = document.getElementById("ui_checkmark");
             const mainText = document.getElementById("loaderMainText");
 
+            // 開啟傳輸遮罩
             loaderOverlay.style.display = "flex"; spinner.style.display = "block"; checkmark.style.display = "none";
-            mainText.innerText = `正在安全校驗庫存並同步雲端數據...`;
+            mainText.innerText = "正在向後台傳輸數據並扣減原子庫存...";
 
-            const generatedOrderId = "LOHAS-" + new Date().toISOString().slice(0,10).replace(/-/g,"") + "-" + Math.floor(1000 + Math.random() * 9000);
-            cachedOrderIdForReceipt = generatedOrderId;
-
+            // 啟動終極雲端落庫鎖
             setTimeout(async () => {
                 try {
                     await runTransaction(db, async (transaction) => {
                         let verifiedProducts = [];
-                        for(let item of cart) {
+                        for(let item of cartSnapshot) {
                             const pRef = doc(db, "products", item.id);
                             const pSnap = await transaction.get(pRef);
                             if (!pSnap.exists()) throw `商品庫存檔案不存在`;
                             let stock = Number(pSnap.data().stock) || 0;
-                            if(stock < item.qty) throw `【${item.name}】庫存不足！`;
+                            if(stock < item.qty) throw `【${item.name}】庫存不足！請重新挑選。`;
                             verifiedProducts.push({ ref: pRef, newStock: stock - item.qty });
                         }
 
@@ -827,80 +857,57 @@
                         for(let prod of verifiedProducts) { transaction.update(prod.ref, { stock: prod.newStock }); }
                         transaction.update(userRef, { points: newPoints, totalSpent: newSpent, stamps: newStamps, level: newLevel, updatedAt: new Date() });
                         
-                        const orderRef = doc(db, "orders", generatedOrderId);
+                        // 🌟 100% 完整結構一次性原子落庫發送，包含雙重映像憑證
+                        const orderRef = doc(db, "orders", cachedOrderIdForReceipt);
                         transaction.set(orderRef, {
-                            orderId: generatedOrderId, uid: currentUserId, userPhone: currentUserPhone,          
-                            items: cart, total: GLOBAL_CURRENT_ORDER_TOTAL, totalAmount: GLOBAL_CURRENT_ORDER_TOTAL, 
-                            paymentMethod: currentSelectedPay, status: "pending_verification", payment_status: "pending",            
-                            receiptImgBase64: "", receiptUrl: "", merchantPhone: LIVE_MERCHANT_PHONE, 
-                            address: finalSavedAddress, createdAt: new Date()                 
+                            orderId: cachedOrderIdForReceipt, 
+                            uid: currentUserId, 
+                            userPhone: currentUserPhone,          
+                            items: cartSnapshot, 
+                            total: GLOBAL_CURRENT_ORDER_TOTAL,       
+                            totalAmount: GLOBAL_CURRENT_ORDER_TOTAL, 
+                            paymentMethod: currentSelectedPay, 
+                            status: "pending_verification",          
+                            payment_status: "pending",            
+                            receiptImgBase64: loadedReceiptBase64, 
+                            receiptUrl: loadedReceiptBase64,       
+                            merchantPhone: LIVE_MERCHANT_PHONE, 
+                            address: finalSavedAddress, 
+                            createdAt: new Date()                 
                         });
                     });
 
+                    // 傳輸成功，更新 UI 收據票據
                     spinner.style.display = "none"; checkmark.style.display = "flex";
-                    mainText.innerText = "雲端交易同步成功！";
+                    mainText.innerText = "雲端訂單建立成功！";
 
-                    document.getElementById("qrModalRouteTitle").innerText = currentSelectedPay === "PayMe" ? "PayMe 轉帳" : (currentSelectedPay === "AlipayHK" ? "AlipayHK 轉帳" : "轉數快 FPS 快捷支付");
-                    document.getElementById("qrModalAmtText").innerText = "HK$ " + GLOBAL_CURRENT_ORDER_TOTAL;
-                    
-                    let targetQrImg = currentSelectedPay === "PayMe" ? LIVE_PAYME_QR : (currentSelectedPay === "AlipayHK" ? LIVE_ALIPAY_QR : LIVE_FPS_QR);
-                    const imgEl = document.getElementById("qrRealTargetImg");
-                    const tipEl = document.getElementById("qrTextTip");
+                    document.getElementById("rcptId").innerText = cachedOrderIdForReceipt;
+                    document.getElementById("rcptTime").innerText = new Date().toLocaleString('zh-HK');
+                    document.getElementById("rcptMethod").innerText = currentSelectedPay + " (附收據·待核對)";
+                    document.getElementById("rcptUid").innerText = currentUserId || "u101";
+                    document.getElementById("rcptTotalAmt").innerText = "HK$ " + GLOBAL_CURRENT_ORDER_TOTAL;
+                    document.getElementById("rcptEarnedPts").innerText = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 10);
+                    document.getElementById("rcptEarnedStamps").innerText = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 200);
+                    document.getElementById("rcptAddress").innerText = finalSavedAddress; 
 
-                    if(targetQrImg && targetQrImg.trim() !== "") {
-                        if(tipEl) tipEl.style.display = "none";
-                        imgEl.src = targetQrImg; 
-                        imgEl.style.display = "block";
-                    } else { 
-                        imgEl.style.display = "none"; 
-                        if(tipEl) {
-                            tipEl.innerText = "❌ 後台尚未配置收款二維碼網址";
-                            tipEl.style.display = "block";
-                        }
-                    }
+                    const rcptWall = document.getElementById("rcptItemsWall");
+                    rcptWall.innerHTML = "";
+                    cartSnapshot.forEach(item => {
+                        rcptWall.innerHTML += `<div class="receipt-item-line"><span>📦 ${item.name} (x${item.qty})</span><span>HK$ ${item.price * item.qty}</span></div>`;
+                    });
 
                     setTimeout(() => {
                         loaderOverlay.style.display = "none";
-                        toggleModal('qrCollectModalOverlay', true); 
+                        document.getElementById("mViewReceiptBtn").style.display = "flex";
+                        toggleModal('receiptModalOverlay', true);
+                        cart = []; renderCart();
                     }, 1000);
 
                 } catch (e) { 
-                    loaderOverlay.style.display = "none"; alert("⚠️ 交易失敗，原因: " + e); 
+                    loaderOverlay.style.display = "none"; 
+                    alert("⚠️ 輸送訂單失敗，原因: " + e); 
                 }
-            }, 1400);
-        };
-
-        window.closeQrAndTriggerReceipt = async function() {
-            if (isCompressingImage) { alert("⏳ 憑證圖片壓縮中，請稍候..."); return; }
-            if(!loadedReceiptBase64 || loadedReceiptBase64.trim() === "") { alert("⚠️ 請先提供過數紙憑證！"); return; }
-
-            const cartSnapshot = [...cart];
-            toggleModal('qrCollectModalOverlay', false);
-            
-            document.getElementById("rcptId").innerText = cachedOrderIdForReceipt;
-            document.getElementById("rcptTime").innerText = new Date().toLocaleString('zh-HK');
-            document.getElementById("rcptMethod").innerText = currentSelectedPay + " (附收據·待核對)";
-            document.getElementById("rcptUid").innerText = currentUserId || "u101";
-            document.getElementById("rcptTotalAmt").innerText = "HK$ " + GLOBAL_CURRENT_ORDER_TOTAL;
-            document.getElementById("rcptEarnedPts").innerText = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 10);
-            document.getElementById("rcptEarnedStamps").innerText = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 200);
-            document.getElementById("rcptAddress").innerText = finalSavedAddress; 
-
-            const rcptWall = document.getElementById("rcptItemsWall");
-            rcptWall.innerHTML = "";
-            cartSnapshot.forEach(item => {
-                rcptWall.innerHTML += `<div class="receipt-item-line"><span>📦 ${item.name} (x${item.qty})</span><span>HK$ ${item.price * item.qty}</span></div>`;
-            });
-
-            try {
-                await setDoc(doc(db, "orders", cachedOrderIdForReceipt), { 
-                    receiptImgBase64: loadedReceiptBase64, receiptUrl: loadedReceiptBase64       
-                }, { merge: true });
-            } catch(err) { console.warn("憑證上載異常：", err.message); }
-
-            document.getElementById("mViewReceiptBtn").style.display = "flex";
-            toggleModal('receiptModalOverlay', true);
-            cart = []; renderCart();
+            }, 1200);
         };
 
         window.saveReceiptAndClose = function() {

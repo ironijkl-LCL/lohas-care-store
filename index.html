@@ -3,31 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOHAS Store 樂活智家零售與康復科技系統 (核心自由配置版 v17.0)</title>
+    <title>LOHAS Store 樂活智家零售與康復科技系統 (核心自由配置版 v16.9)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* 全域樣式：嚴格遵從系統核心憲章（Core Constitution v2.3） */
+        /* 全域樣式：嚴格遵從系統核心憲章（Core Constitution v2.3）並融入 Apple 極簡美學 */
         :root {
-            --primary-color: #D32F2F;      /* 核心憲章指定：鮮明紅色 */
-            --secondary-color: #FFB300;    /* 核心憲章指定：活力黃色 */
-            --bg-color: #F4F6F8;           /* 柔和底色 */
-            --text-dark: #212121;
-            --text-light: #666666;
+            --primary-color: #FF453A;       /* Apple iOS 規範：鮮明系統紅 */
+            --secondary-color: #FFD60A;     /* Apple iOS 規範：活力系統黃 */
+            --bg-color: rgba(242, 242, 247, 0.85); /* Apple 柔和淺色底色 */
+            --text-dark: #1C1C1E;           /* Apple 系統主要文字色 */
+            --text-light: #8E8E93;          /* Apple 系統次要標籤色 */
             --white: #FFFFFF;
-            --button-height: 48px;         /* 核心憲章指定：標準高點擊度按鈕高度 */
-            --accent-green: #2E7D32;       /* 成功/積分提示色 */
+            --button-height: 52px;          /* 升級：更具備 Apple 點擊質感的按鈕高度 */
+            --accent-green: #34C759;        /* Apple iOS 規範：成功系統綠 */
+            --apple-black: #000000;
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --card-radius: 16px;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
+            letter-spacing: -0.01em;
         }
 
         body {
-            background-color: #1E1E24;
+            background: radial-gradient(circle at center, #2C2C2E 0%, #1C1C1E 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -35,207 +39,781 @@
             padding: 20px;
         }
 
-        /* 模擬手機外殼 */
+        /* 模擬 Apple 頂級手機外殼 */
         .phone-mockup {
-            width: 375px;
-            height: 780px;
-            background-color: var(--bg-color);
-            border: 12px solid #333;
-            border-radius: 40px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            width: 393px;                   /* 升級至現代 iPhone 標準寬度 */
+            height: 852px;                   /* 升級至現代 iPhone 標準高度 */
+            background-color: #F2F2F7;
+            border: 12px solid #3A3A3C;
+            border-radius: 54px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6), inset 0 0 2px 2px rgba(255,255,255,0.1);
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
+        /* 動態島/瀏海進化版 */
         .phone-notch {
             position: absolute;
-            top: 0;
+            top: 12px;
             left: 50%;
             transform: translateX(-50%);
-            width: 150px;
-            height: 24px;
-            background-color: #333;
-            border-bottom-left-radius: 15px;
-            border-bottom-right-radius: 15px;
+            width: 110px;
+            height: 30px;
+            background-color: #000000;
+            border-radius: 20px;
             z-index: 9999;
         }
 
-        /* App 頂部導航欄 */
+        /* App 頂部導航欄 (毛玻璃質感) */
         .app-header {
-            background-color: var(--primary-color);
+            background: rgba(213, 47, 47, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             color: var(--white);
-            padding: 32px 16px 12px 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            padding: 48px 20px 16px 20px;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 10;
         }
 
-        .header-title { font-size: 16px; font-weight: bold; }
-        .app-content { flex: 1; overflow-y: auto; padding: 14px; padding-bottom: 90px; }
-        .section-title { font-size: 14px; font-weight: bold; color: var(--text-dark); margin: 14px 0 8px 2px; display: flex; justify-content: space-between; align-items: center; }
-
-        /* 提示訊息彈窗 */
-        .toast-msg {
-            position: absolute;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: #fff;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            z-index: 99999;
-            display: none;
+        .header-title { 
+            font-size: 18px; 
+            font-weight: 700; 
+            letter-spacing: -0.02em;
+        }
+        
+        .app-content { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 20px; 
+            padding-bottom: 110px;
+            background-color: #F2F2F7;
+        }
+        
+        .section-title { 
+            font-size: 15px; 
+            font-weight: 600; 
+            color: var(--text-light);
+            margin: 24px 0 10px 4px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
 
-        /* 會員中心卡片 */
-        .member-dash-card { background: linear-gradient(135deg, #37474F, #212121); color: var(--white); padding: 14px; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .member-info-row { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; margin-bottom: 8px; }
-        .member-name { font-size: 16px; font-weight: bold; }
+        /* 提示訊息彈窗 (iOS 膠囊通知樣式) */
+        .toast-msg {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 99999;
+            display: none;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            animation: applePop 0.3s ease;
+        }
+
+        @keyframes applePop {
+            from { transform: translateX(-50%) scale(0.9); opacity: 0; }
+            to { transform: translateX(-50%) scale(1); opacity: 1; }
+        }
+
+        /* 會員中心卡片 (Premium 暗黑高級感) */
+        .member-dash-card { 
+            background: linear-gradient(135deg, #1C1C1E 0%, #2C2C2E 100%);
+            color: var(--white); 
+            padding: 20px; 
+            border-radius: var(--card-radius); 
+            margin-bottom: 16px; 
+            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .member-info-row { 
+            display: flex; 
+            flex-direction: column-reverse; 
+            gap: 16px; 
+            align-items: flex-start; 
+            margin-bottom: 12px;
+        }
+        .member-name { 
+            font-size: 20px; 
+            font-weight: 700; 
+            letter-spacing: -0.02em;
+        }
         
         /* 按鈕區域 */
-        .member-btn-zone { display: flex; gap: 6px; width: 100%; justify-content: flex-start; }
+        .member-btn-zone { 
+            display: flex;
+            gap: 8px; 
+            width: 100%; 
+            justify-content: flex-start; 
+        }
         
         .btn-switch-user, .btn-view-receipt, .btn-logout-user { 
-            flex: 1; 
-            height: 34px; 
-            font-size: 12px; 
-            border-radius: 6px; 
+            flex: 1;
+            height: 38px; 
+            font-size: 13px; 
+            border-radius: 10px; 
             cursor: pointer; 
-            font-weight: 500; 
+            font-weight: 600; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            white-space: nowrap; 
-            padding: 0 4px;
-            text-align: center;
+            white-space: nowrap;
+            padding: 0 10px;
+            transition: all 0.2s ease;
+            border: none;
         }
-        .btn-switch-user { background: rgba(255, 255, 255, 0.15); color: var(--white); border: 1px solid rgba(255,255,255,0.2); }
-        .btn-view-receipt { background: rgba(255, 179, 0, 0.25); color: var(--secondary-color); border: 1px solid rgba(255,179,0,0.3); display: none; }
-        .btn-logout-user { background: rgba(213, 0, 0, 0.4); color: #FFCDD2; border: 1px solid rgba(255,255,23,0.3); display: none; }
+        .btn-switch-user { 
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--white);
+        }
+        .btn-switch-user:active { background: rgba(255, 255, 255, 0.2); transform: scale(0.97); }
         
-        .member-details-grid { display: flex; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; margin-top: 6px; }
-        .grid-item { flex: 1; text-align: center; }
-        .grid-item:first-child { border-right: 1px solid rgba(255,255,255,0.1); }
-        .grid-val { font-size: 15px; font-weight: bold; color: var(--secondary-color); }
+        .btn-view-receipt { 
+            background: rgba(255, 214, 10, 0.15);
+            color: var(--secondary-color); 
+            display: none; 
+        }
+        .btn-view-receipt:active { transform: scale(0.97); }
+        
+        .btn-logout-user { 
+            background: rgba(255, 69, 58, 0.15);
+            color: #FF453A; 
+            display: none; 
+        }
+        .btn-logout-user:active { transform: scale(0.97); }
+        
+        .member-details-grid { 
+            display: flex;
+            border-top: 1px solid rgba(255,255,255,0.08); 
+            padding-top: 14px; 
+            margin-top: 12px; 
+        }
+        .grid-item { 
+            flex: 1;
+            text-align: center; 
+        }
+        .grid-item:first-child { 
+            border-right: 1px solid rgba(255,255,255,0.08);
+        }
+        .grid-val { 
+            font-size: 18px; 
+            font-weight: 700; 
+            color: var(--secondary-color); 
+        }
 
-        /* 數位印花卡樣式 */
-        .stamp-wallet-card { background: linear-gradient(135deg, #FF7043, #FF5722); border-radius: 16px; padding: 14px; color: var(--white); box-shadow: 0 6px 15px rgba(255, 87, 34, 0.25); margin-bottom: 14px; }
-        .stamp-card-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; border-bottom: 1px dashed rgba(255,255,255,0.3); padding-bottom: 6px; margin-bottom: 10px; }
-        .stamp-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; justify-items: center; }
-        .stamp-slot { width: 42px; height: 42px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.2); border: 2px dashed rgba(255, 255, 255, 0.5); display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; color: rgba(255, 255, 255, 0.4); }
-        .stamp-slot.active { background-color: var(--secondary-color); border: 2px solid var(--secondary-color); color: #212121; box-shadow: 0 0 8px rgba(255, 179, 0, 0.5); }
-        .stamp-card-footer { margin-top: 10px; font-size: 11px; text-align: center; background-color: rgba(0,0,0,0.1); padding: 4px; border-radius: 6px; }
+        /* 數位印花卡樣式 (Apple 繽紛活力漸變) */
+        .stamp-wallet-card { 
+            background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%);
+            border-radius: var(--card-radius); 
+            padding: 20px; 
+            color: var(--white); 
+            box-shadow: 0 12px 24px rgba(255, 94, 0, 0.2); 
+            margin-bottom: 16px;
+        }
+        .stamp-card-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-size: 13px; 
+            font-weight: 600;
+            border-bottom: 1px dashed rgba(255,255,255,0.25); 
+            padding-bottom: 10px; 
+            margin-bottom: 14px; 
+        }
+        .stamp-grid { 
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 10px; 
+            justify-items: center; 
+        }
+        .stamp-slot { 
+            width: 46px;
+            height: 46px; 
+            border-radius: 50%; 
+            background-color: rgba(255, 255, 255, 0.15); 
+            border: 1.5px dashed rgba(255, 255, 255, 0.4); 
+            display: flex; 
+            justify-content: center;
+            align-items: center; 
+            font-size: 14px; 
+            font-weight: 600; 
+            color: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .stamp-slot.active { 
+            background-color: var(--white); 
+            border: 2px solid var(--white); 
+            color: #FF5E00;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); 
+        }
+        .stamp-card-footer { 
+            margin-top: 14px;
+            font-size: 12px; 
+            text-align: center; 
+            background-color: rgba(0,0,0,0.06); 
+            padding: 6px; 
+            border-radius: 8px;
+            font-weight: 500;
+        }
 
-        /* 商品展示牆與白卡片 */
-        .products-grid { display: flex; flex-direction: column; gap: 12px; }
-        .product-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.04); border: 1px solid #EAEAEA; display: flex; height: 100px; }
-        .product-img-wrapper { width: 100px; height: 100%; background-color: #ECEFF1; position: relative; flex-shrink: 0; }
-        .product-img { width: 100%; height: 100%; object-fit: cover; }
-        .stock-tag { position: absolute; bottom: 4px; left: 4px; background-color: rgba(0,0,0,0.65); color: var(--white); font-size: 10px; padding: 1px 4px; border-radius: 3px; }
-        .product-body { flex: 1; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between; }
-        .product-title { font-size: 12px; font-weight: bold; color: var(--text-dark); line-height: 1.3; }
-        .product-footer { display: flex; justify-content: space-between; align-items: center; }
-        .product-price { font-size: 16px; color: var(--primary-color); font-weight: bold; }
-        .btn-add { background-color: var(--secondary-color); color: #212121; border: none; padding: 0 12px; height: 32px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
-        .card { background: var(--white); border-radius: 12px; padding: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); border: 1px solid #EAEAEA; }
+        /* 商品展示牆與極簡白卡片 */
+        .products-grid { 
+            display: flex;
+            flex-direction: column; 
+            gap: 14px; 
+        }
+        .product-card { 
+            background: var(--white); 
+            border-radius: var(--card-radius); 
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
+            border: 1px solid rgba(0,0,0,0.04); 
+            display: flex; 
+            height: 110px;
+            transition: transform 0.2s ease;
+        }
+        .product-card:active { transform: scale(0.99); }
+        .product-img-wrapper { 
+            width: 110px; 
+            height: 100%; 
+            background-color: #F2F2F7; 
+            position: relative; 
+            flex-shrink: 0;
+        }
+        .product-img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover;
+        }
+        .stock-tag { 
+            position: absolute; 
+            bottom: 6px; 
+            left: 6px; 
+            background-color: rgba(0,0,0,0.6); 
+            backdrop-filter: blur(4px);
+            color: var(--white);
+            font-size: 10px; 
+            font-weight: 500;
+            padding: 2px 6px; 
+            border-radius: 6px; 
+        }
+        .product-body { 
+            flex: 1;
+            padding: 12px 14px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+        }
+        .product-title { 
+            font-size: 14px;
+            font-weight: 600; 
+            color: var(--text-dark); 
+            line-height: 1.4; 
+        }
+        .product-footer { 
+            display: flex; 
+            justify-content: space-between;
+            align-items: center; 
+        }
+        .product-price { 
+            font-size: 17px; 
+            color: var(--text-dark); 
+            font-weight: 700;
+        }
+        .btn-add { 
+            background-color: var(--text-dark); 
+            color: var(--white); 
+            border: none; 
+            padding: 0 16px;
+            height: 32px; 
+            border-radius: 16px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+        .btn-add:active { background-color: #48484A; transform: scale(0.95); }
+        
+        .card { 
+            background: var(--white); 
+            border-radius: var(--card-radius); 
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
+            border: 1px solid rgba(0,0,0,0.04); 
+        }
 
         /* 購物車清單 */
-        .cart-list { list-style: none; padding: 0; }
-        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-size: 13px; border-bottom: 1px dashed #EEF0F2; }
-        .qty-picker { display: flex; align-items: center; gap: 4px; background: #F0F2F5; padding: 2px; border-radius: 6px; margin-right: 8px; }
-        .btn-qty { background: var(--white); border: 1px solid #D0D4DC; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 4px; }
-        .qty-num { min-width: 24px; text-align: center; font-weight: bold; font-size: 14px; }
-        .cart-right-zone { display: flex; align-items: center; }
-        .btn-remove { background: none; border: none; cursor: pointer; font-size: 14px; padding: 6px; }
+        .cart-list { 
+            list-style: none;
+            padding: 0; 
+        }
+        .cart-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: 12px 0; 
+            font-size: 14px; 
+            border-bottom: 1px dashed #E5E5EA; 
+        }
+        .cart-item:last-child { border-bottom: none; }
+        .qty-picker { 
+            display: flex;
+            align-items: center; 
+            gap: 6px; 
+            background: #E5E5EA; 
+            padding: 3px; 
+            border-radius: 8px; 
+            margin-right: 10px;
+        }
+        .btn-qty { 
+            background: var(--white); 
+            border: none;
+            width: 26px; 
+            height: 26px;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 15px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .qty-num { 
+            min-width: 26px; 
+            text-align: center; 
+            font-weight: 600; 
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+        .cart-right-zone { 
+            display: flex; 
+            align-items: center;
+        }
+        .btn-remove { 
+            background: none; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 15px; 
+            padding: 6px; 
+        }
 
-        /* 底部落單面板 */
-        .checkout-bar { position: absolute; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 1px solid #E5E5E5; padding: 12px 16px; box-shadow: 0 -4px 10px rgba(0,0,0,0.06); display: flex; justify-content: space-between; align-items: center; z-index: 900; }
-        .summary-amt { font-size: 20px; font-weight: bold; color: var(--primary-color); }
-        .btn-checkout { background-color: var(--primary-color); color: var(--white); border: none; padding: 0 24px; height: var(--button-height); border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; }
+        /* 底部操作面板 (毛玻璃頂級奢華感) */
+        .checkout-bar { 
+            position: absolute;
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0,0,0,0.05); 
+            padding: 16px 20px 28px 20px; 
+            box-shadow: 0 -8px 24px rgba(0,0,0,0.04);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 900; 
+        }
+        .summary-amt { 
+            font-size: 24px;
+            font-weight: 800; 
+            color: var(--text-dark); 
+            letter-spacing: -0.03em;
+        }
+        .btn-checkout { 
+            background-color: var(--primary-color); 
+            color: var(--white); 
+            border: none;
+            padding: 0 28px; 
+            height: var(--button-height); 
+            border-radius: 26px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(255, 69, 58, 0.3);
+        }
+        .btn-checkout:active { transform: scale(0.97); opacity: 0.95; }
 
         /* 全螢幕加載遮罩層 */
-        .fullscreen-payment-loader { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(26, 26, 31, 0.96); z-index: 100000; display: none; flex-direction: column; justify-content: center; align-items: center; color: var(--white); padding: 30px; }
-        .spinner-ring { width: 60px; height: 60px; border: 5px solid rgba(255, 179, 0, 0.15); border-top: 5px solid var(--secondary-color); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 24px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .success-checkmark-wrapper { display: none; width: 68px; height: 68px; background-color: var(--accent-green); border-radius: 50%; justify-content: center; align-items: center; margin-bottom: 24px; box-shadow: 0 0 20px rgba(46, 125, 50, 0.5); }
-        .checkmark-icon { color: var(--white); font-size: 36px; font-weight: bold; }
-        .loader-status-text { font-size: 15px; font-weight: bold; color: #ECEFF1; margin-bottom: 6px; text-align: center; }
-        .loader-sub-text { font-size: 12px; color: #90A4AE; text-align: center; }
+        .fullscreen-payment-loader { 
+            position: absolute;
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0, 0, 0, 0.9); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 100000; 
+            display: none; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            color: var(--white); 
+            padding: 30px; 
+        }
+        .spinner-ring { 
+            width: 50px;
+            height: 50px; 
+            border: 4px solid rgba(255, 255, 255, 0.1); 
+            border-top: 4px solid var(--white); 
+            border-radius: 50%; 
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 24px; 
+        }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+        .success-checkmark-wrapper { 
+            display: none; 
+            width: 64px;
+            height: 64px; 
+            background-color: var(--accent-green); 
+            border-radius: 50%; 
+            justify-content: center; 
+            align-items: center; 
+            margin-bottom: 24px; 
+            box-shadow: 0 0 24px rgba(52, 199, 89, 0.4);
+        }
+        .checkmark-icon { 
+            color: var(--white); 
+            font-size: 32px; 
+            font-weight: bold;
+        }
+        .loader-status-text { 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: #FFFFFF; 
+            margin-bottom: 8px; 
+            text-align: center; 
+        }
+        .loader-sub-text { 
+            font-size: 13px; 
+            color: var(--text-light); 
+            text-align: center;
+        }
 
-        /* 彈出層基礎 */
-        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 9999; display: flex; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-overlay.center-style { align-items: center; }
+        /* 彈出層基礎 (iOS 高階床頭櫃面板滑出樣式) */
+        .modal-overlay { 
+            position: absolute;
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.4); 
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 9999; 
+            display: flex; 
+            justify-content: center; 
+            padding: 20px; 
+            opacity: 0;
+            pointer-events: none; 
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+        }
+        .modal-overlay.active { 
+            opacity: 1; 
+            pointer-events: auto;
+        }
+        
+        .modal-overlay.center-style { 
+            align-items: center;
+        }
         
         /* 底部滑出抽屜 */
-        .modal-overlay.bottom-drawer-style { align-items: flex-end; padding: 0; }
-        .modal-overlay.bottom-drawer-style .qr-receipt-box {
-            border-top-left-radius: 24px; border-top-right-radius: 24px;
-            padding: 20px 20px 32px 20px; width: 100%; box-shadow: 0 -8px 30px rgba(0,0,0,0.25);
-            background-color: var(--white); text-align: center; max-height: 85%; overflow-y: auto;
-            position: absolute; bottom: 0; left: 0; animation: slideUp 0.3s cubic-bezier(0.1, 0.8, 0.25, 1) forwards;
+        .modal-overlay.bottom-drawer-style, .modal-overlay.bottom-style { 
+            align-items: flex-end;
+            padding: 0; 
         }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
+        .reg-modal, .qr-receipt-box { 
+            background-color: rgba(255, 255, 255, 0.94); 
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            width: 100%; 
+            border-top-left-radius: 32px;
+            border-top-right-radius: 32px;
+            padding: 24px 24px 44px 24px; 
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.15); 
+            text-align: center;
+            max-height: 85%;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .modal-overlay.active .reg-modal, .modal-overlay.active .qr-receipt-box {
+            transform: translateY(0);
+        }
 
-        .modal-overlay.bottom-style { align-items: flex-end; padding: 0; }
-        .reg-modal { background-color: var(--white); width: 100%; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; }
-        .modal-overlay.bottom-style .reg-modal { border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding-bottom: 30px; border-top-left-radius: 20px; border-top-right-radius: 20px; }
-        .modal-title { font-size: 16px; font-weight: bold; color: var(--text-dark); margin-bottom: 16px; }
+        .modal-title { 
+            font-size: 18px;
+            font-weight: 700; 
+            color: var(--text-dark); 
+            margin-bottom: 20px; 
+            letter-spacing: -0.02em;
+        }
         
-        .input-group { text-align: left; margin-bottom: 12px; }
-        .input-group label { font-size: 11px; font-weight: bold; color: var(--text-light); display: block; margin-bottom: 4px; }
-        .input-field { width: 100%; height: 40px; border: 1.5px solid #EAEAEA; border-radius: 8px; padding: 0 12px; font-size: 13px; outline: none; }
-        .input-field:focus { border-color: var(--primary-color); }
+        .input-group { 
+            text-align: left;
+            margin-bottom: 16px; 
+        }
+        .input-group label { 
+            font-size: 12px; 
+            font-weight: 600; 
+            color: var(--text-light);
+            display: block; 
+            margin-bottom: 6px; 
+            padding-left: 2px;
+        }
+        .input-field { 
+            width: 100%; 
+            height: 46px;
+            border: none;
+            background: rgba(0,0,0,0.05);
+            border-radius: 12px; 
+            padding: 0 16px; 
+            font-size: 15px; 
+            color: var(--text-dark);
+            outline: none;
+            transition: background 0.2s ease;
+        }
+        .input-field:focus { 
+            background: rgba(0,0,0,0.08);
+        }
         
-        .btn-submit-payment { width: 100%; height: var(--button-height); background-color: var(--primary-color); color: var(--white); border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
-        .btn-close-modal { background: none; border: none; color: var(--text-light); font-size: 13px; margin-top: 12px; cursor: pointer; text-decoration: underline; }
+        .btn-submit-payment { 
+            width: 100%;
+            height: var(--button-height); 
+            background-color: var(--text-dark); 
+            color: var(--white); 
+            border: none; 
+            border-radius: 26px; 
+            font-size: 15px; 
+            font-weight: 600; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-submit-payment:active { transform: scale(0.98); opacity: 0.9; }
+        
+        .btn-close-modal { 
+            background: none; 
+            border: none; 
+            color: var(--text-light); 
+            font-size: 14px; 
+            font-weight: 500;
+            margin-top: 16px;
+            cursor: pointer; 
+            text-decoration: none; 
+        }
 
         /* 支付管道列表 */
-        .pay-route-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-        .pay-route-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1.5px solid #EAEAEA; border-radius: 8px; cursor: pointer; font-size: 13px; text-align: left; }
-        .pay-route-item.selected { border-color: var(--primary-color); background-color: rgba(211, 47, 47, 0.04); color: var(--primary-color); font-weight: bold; }
-        .gateway-tag { font-size: 10px; background: #EEF0F2; padding: 2px 6px; border-radius: 4px; color: var(--text-light); }
+        .pay-route-list { 
+            display: flex;
+            flex-direction: column; 
+            gap: 10px; 
+            margin-bottom: 20px; 
+        }
+        .pay-route-item { 
+            display: flex; 
+            justify-content: space-between;
+            align-items: center; 
+            padding: 14px 16px; 
+            border: 2px solid transparent; 
+            background: rgba(0,0,0,0.04);
+            border-radius: 14px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            font-weight: 600;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+        .pay-route-item.selected { 
+            border-color: var(--text-dark); 
+            background-color: var(--white); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .gateway-tag { 
+            font-size: 11px; 
+            background: rgba(0,0,0,0.06); 
+            padding: 3px 8px;
+            border-radius: 6px; 
+            color: var(--text-light); 
+            font-weight: 500;
+        }
 
         /* 憑證上傳按鈕組 */
-        .dual-upload-row { display: flex; gap: 10px; margin: 12px 0; width: 100%; }
-        .upload-btn-item {
-            flex: 1; background-color: var(--white); border: 1.5px solid var(--secondary-color);
-            color: #5D4037; height: 40px; border-radius: 8px; font-size: 12.5px; font-weight: bold;
-            display: flex; justify-content: center; align-items: center; gap: 6px; cursor: pointer;
+        .dual-upload-row { 
+            display: flex;
+            gap: 12px; 
+            margin: 16px 0; 
+            width: 100%; 
         }
-        .upload-btn-item.has-file { background-color: var(--accent-green) !important; border-color: var(--accent-green) !important; color: var(--white) !important; }
+        .upload-btn-item {
+            flex: 1; 
+            background-color: rgba(0,0,0,0.04); 
+            border: none;
+            color: var(--text-dark); 
+            height: 44px; 
+            border-radius: 12px; 
+            font-size: 13.5px; 
+            font-weight: 600;
+            display: flex; 
+            justify-content: center;
+            align-items: center; 
+            gap: 6px; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .upload-btn-item:active { transform: scale(0.97); background-color: rgba(0,0,0,0.08); }
+        .upload-btn-item.has-file { 
+            background-color: var(--accent-green) !important;
+            color: var(--white) !important; 
+        }
         
         .hidden-system-file-input { display: none; }
-        .receipt-preview-box { display: none; margin-top: 4px; width: 100%; height: 70px; background-color: #ECEFF1; border-radius: 6px; align-items: center; padding: 6px; gap: 10px; text-align: left; }
-        .receipt-preview-img { height: 100%; width: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #CCC; }
-        .receipt-preview-info { font-size: 11px; color: var(--accent-green); font-weight: 500; }
-
-        /* 收據票據面板 */
-        .receipt-ticket { background: var(--white); width: 100%; max-width: 340px; border-radius: 14px; padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); text-align: left; color: var(--text-dark); }
-        .receipt-header { text-align: center; border-bottom: 2px dashed #E0E0E0; padding-bottom: 10px; margin-bottom: 12px; }
-        .receipt-brand { font-size: 16px; font-weight: 900; color: var(--primary-color) !important; letter-spacing: 0.5px; }
-        .receipt-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; line-height: 1.4; }
-        .receipt-label { color: var(--text-light); }
-        .receipt-val { font-weight: 500; text-align: right; max-width: 65%; word-break: break-all; }
-        .receipt-items-box { background: #F5F7F8; border-radius: 6px; padding: 8px; margin: 6px 0; max-height: 100px; overflow-y: auto; }
-        .receipt-item-line { display: flex; justify-content: space-between; font-size: 11px; color: #424242; margin-bottom: 3px; }
-        .receipt-total-line { display: flex; justify-content: space-between; font-size: 15px; font-weight: bold; border-top: 1px solid #E0E0E0; padding-top: 8px; margin-top: 8px; color: var(--primary-color); }
-        .receipt-reward-box { background: rgba(46, 125, 50, 0.05); border: 1px solid rgba(46, 125, 50, 0.12); border-radius: 8px; padding: 8px; margin-top: 10px; font-size: 11px; color: #1B5E20; line-height: 1.5; }
-        
-        /* 二維碼容器固定大小與強健的容錯外觀 */
-        .qr-placeholder {
-            width: 180px; height: 180px; margin: 15px auto;
-            background-color: #ECEFF1; border: 1px solid #CFD8DC;
-            border-radius: 8px; display: flex; flex-direction: column; justify-content: center;
-            align-items: center; position: relative; overflow: hidden; padding: 10px;
+        .receipt-preview-box { 
+            display: none; 
+            margin-top: 4px; 
+            width: 100%; 
+            height: 80px; 
+            background-color: var(--white);
+            border-radius: 12px; 
+            align-items: center; 
+            padding: 10px; 
+            gap: 12px; 
+            text-align: left;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.04);
         }
-        .qr-real-img { width: 100%; height: 100%; object-fit: contain; display: none; }
+        .receipt-preview-img { 
+            height: 100%; 
+            width: 60px; 
+            object-fit: cover; 
+            border-radius: 8px;
+        }
+        .receipt-preview-info { 
+            font-size: 12px; 
+            color: var(--accent-green); 
+            font-weight: 600; 
+        }
+
+        /* 正式精緻收據票據面板 */
+        .receipt-ticket { 
+            background: var(--white);
+            width: 100%; 
+            max-width: 345px; 
+            border-radius: 24px; 
+            padding: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12); 
+            text-align: left; 
+            color: var(--text-dark);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+        .receipt-header { 
+            text-align: center; 
+            border-bottom: 1px dashed #E5E5EA; 
+            padding-bottom: 14px; 
+            margin-bottom: 16px;
+        }
+        .receipt-brand { 
+            font-size: 18px; 
+            font-weight: 800; 
+            color: var(--text-dark) !important; 
+            letter-spacing: 0.05em;
+        }
+        .receipt-row { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 12px; 
+            margin-bottom: 6px; 
+            line-height: 1.5; 
+        }
+        .receipt-label { color: var(--text-light); }
+        .receipt-val { 
+            font-weight: 600; 
+            text-align: right; 
+            max-width: 65%; 
+            word-break: break-all; 
+        }
+        .receipt-items-box { 
+            background: #F2F2F7; 
+            border-radius: 10px; 
+            padding: 10px; 
+            margin: 8px 0;
+            max-height: 110px; 
+            overflow-y: auto; 
+        }
+        .receipt-item-line { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 12px;
+            color: var(--text-dark); 
+            margin-bottom: 4px; 
+            font-weight: 500;
+        }
+        .receipt-total-line { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 16px;
+            font-weight: 700; 
+            border-top: 1px solid #E5E5EA; 
+            padding-top: 10px; 
+            margin-top: 10px; 
+            color: var(--apple-black);
+        }
+        .receipt-reward-box { 
+            background: rgba(52, 199, 89, 0.06);
+            border: 1px solid rgba(52, 199, 89, 0.15); 
+            border-radius: 12px; 
+            padding: 10px; 
+            margin-top: 12px; 
+            font-size: 12px; 
+            color: #1C7430; 
+            line-height: 1.6; 
+        }
+        
+        /* 二維碼盒子 */
+        .qr-placeholder {
+            width: 190px;
+            height: 190px; 
+            margin: 18px auto;
+            background-color: var(--white); 
+            border: 1px solid #E5E5EA;
+            border-radius: 16px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center;
+            align-items: center; 
+            position: relative; 
+            overflow: hidden; 
+            padding: 12px;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.02);
+        }
+        .qr-real-img { 
+            width: 100%;
+            height: 100%; 
+            object-fit: contain; 
+            display: none; 
+        }
     </style>
 </head>
 <body>
@@ -245,7 +823,7 @@
         
         <header class="app-header">
             <span class="header-title">LOHAS STORE</span>
-            <span style="font-size:11px; background:rgba(255,255,255,0.2); padding:3px 8px; border-radius:8px; font-weight:500;">樂活智家零售與康復科技</span>
+            <span style="font-size:11px; background:rgba(255,255,255,0.15); padding:4px 10px; border-radius:12px; font-weight:600;">樂活智家康復科技</span>
         </header>
 
         <div class="toast-msg" id="toastBox">提示訊息</div>
@@ -253,13 +831,13 @@
         <div class="fullscreen-payment-loader" id="paymentFullscreenLoader">
             <div class="spinner-ring" id="ui_spinner"></div>
             <div class="success-checkmark-wrapper" id="ui_checkmark"><span class="checkmark-icon">✓</span></div>
-            <div class="loader-status-text" id="loaderMainText">正在傳輸數據並同步雲端交易...</div>
+            <div class="loader-status-text" id="loaderMainText">正在安全連接支付閘道...</div>
             <div class="loader-sub-text" id="loaderSubText">請勿關閉頁面或進行中斷操作</div>
         </div>
 
-        <div class="modal-overlay center-style" id="regModalOverlay">
+        <div class="modal-overlay bottom-style" id="regModalOverlay">
             <div class="reg-modal">
-                <div class="modal-title" style="color:var(--primary-color);">LOHAS 會員登記中心</div>
+                <div class="modal-title">LOHAS 會員登記中心</div>
                 <div class="input-group">
                     <label>手機號碼 (登入唯一憑證)</label>
                     <input type="tel" class="input-field" id="regPhone" placeholder="請輸入8位手機號碼">
@@ -278,12 +856,12 @@
             <div class="reg-modal">
                 <div class="modal-title">選擇本地安全支付方式</div>
                 
-                <div style="font-size:13px; text-align:left; color:var(--text-dark); background:#F0F2F5; padding:10px; border-radius:8px; margin-bottom:12px;">
-                    應付總額：<span id="payModalAmt" style="color:var(--primary-color); font-weight:bold; font-size:16px;">HK$ 0</span>
+                <div style="font-size:14px; text-align:left; color:var(--text-dark); background:rgba(0,0,0,0.04); padding:12px; border-radius:12px; margin-bottom:16px; font-weight: 500;">
+                    應付總額：<span id="payModalAmt" style="color:var(--text-dark); font-weight:700; font-size:17px;">HK$ 0</span>
                 </div>
 
-                <div class="input-group" style="margin-bottom:14px;">
-                    <label style="color:var(--primary-color);">📍 填寫送貨地址</label>
+                <div class="input-group" style="margin-bottom:16px;">
+                    <label style="color:var(--text-dark);">📍 填寫送貨地址</label>
                     <input type="text" class="input-field" id="checkoutAddressField" placeholder="請輸入詳細送貨地址">
                 </div>
 
@@ -299,7 +877,7 @@
                     </div>
                 </div>
                 
-                <button class="btn-submit-payment" onclick="prepareLocalOrderTransaction()">安全確認付款並獲取收款碼</button>
+                <button class="btn-submit-payment" style="background-color: var(--primary-color);" onclick="startServerOrderTransaction()">安全確認付款並獲取收款碼</button>
                 <br>
                 <button class="btn-close-modal" onclick="toggleModal('paymentModalOverlay', false)">取消付款</button>
             </div>
@@ -307,17 +885,17 @@
 
         <div class="modal-overlay bottom-drawer-style" id="qrCollectModalOverlay">
             <div class="qr-receipt-box">
-                <div style="font-size:15px; font-weight:bold; color:var(--primary-color);">LOHAS 安全收銀台</div>
-                <div style="font-size:11px; color:var(--text-light); margin-top:2px;">請掃描二維碼或完成過數並上傳憑證</div>
+                <div style="font-size:16px; font-weight:700; color:var(--text-dark);">LOHAS 安全收銀台</div>
+                <div style="font-size:12px; color:var(--text-light); margin-top:4px;">請掃描二維碼或完成過數並上傳憑證</div>
                 
                 <div class="qr-placeholder" id="qrContainerWrapper">
-                    <span id="qrTextTip" style="font-size:12px; color:var(--text-light); text-align:center; padding:10px;">📷 正在動態加載收款碼...</span>
+                    <span id="qrTextTip" style="font-size:13px; color:var(--text-light); text-align:center; padding:12px;">📷 正在動態加載收款碼...</span>
                     <img src="" class="qr-real-img" id="qrRealTargetImg" alt="收錢碼" onerror="handleQrLoadError(this)">
                 </div>
 
-                <div style="font-size:12px; color:var(--text-dark); margin-bottom: 4px;">
-                    收款管道：<span id="qrModalRouteTitle" style="font-weight:bold; color:var(--accent-green);">-</span><br>
-                    需入數總額：<span id="qrModalAmtText" style="font-size:15px; font-weight:bold; color:var(--primary-color);">HK$ 0</span>
+                <div style="font-size:13px; color:var(--text-dark); margin-bottom: 8px; text-align: left; line-height: 1.6; padding-left: 4px;">
+                    收款管道：<span id="qrModalRouteTitle" style="font-weight:700; color:var(--accent-green);">-</span><br>
+                    需入數總額：<span id="qrModalAmtText" style="font-size:16px; font-weight:700; color:var(--apple-black);">HK$ 0</span>
                 </div>
 
                 <div class="dual-upload-row">
@@ -331,13 +909,13 @@
 
                 <input type="file" class="hidden-system-file-input" id="receiptFileInput" accept="image/*" onchange="handleReceiptFileSelect(event)">
 
-                <div class="receipt-preview-box" id="uiRcptPreviewBox" style="margin-bottom:10px;">
+                <div class="receipt-preview-box" id="uiRcptPreviewBox" style="margin-bottom:14px;">
                     <img src="" class="receipt-preview-img" id="uiRcptPreviewImg">
-                    <div class="receipt-preview-info">✓ 憑證已成功安全壓縮加載<br><span style="font-size:9px; color:var(--text-light);">就緒，可點擊下方按鈕送出</span></div>
+                    <div class="receipt-preview-info">✓ 憑證已成功安全壓縮加載<br><span style="font-size:10px; color:var(--text-light); font-weight: normal;">就緒，可點擊下方按鈕送出</span></div>
                 </div>
 
-                <button class="btn-submit-payment" id="uiFinalReceiptSubmitBtn" style="background-color:var(--accent-green);" onclick="submitOrderWithReceiptToServer()">我已完成轉帳，生成收據</button>
-                <button class="btn-close-modal" style="margin-top: 14px; font-size: 13px;" onclick="toggleModal('qrCollectModalOverlay', false)">❌ 取消付款並返回商店</button>
+                <button class="btn-submit-payment" id="uiFinalReceiptSubmitBtn" style="background-color:var(--accent-green);" onclick="closeQrAndTriggerReceipt()">我已完成轉帳，生成收據</button>
+                <button class="btn-close-modal" style="margin-top: 16px;" onclick="toggleModal('qrCollectModalOverlay', false)">❌ 取消付款並返回商店</button>
             </div>
         </div>
 
@@ -345,26 +923,26 @@
             <div class="receipt-ticket" id="targetReceiptPrintNode">
                 <div class="receipt-header">
                     <div class="receipt-brand">LOHAS CARE RECEIPT</div>
-                    <div style="font-size:11px; color:var(--text-light); margin-top:4px;">謝謝您的惠顧！訂單已列入核對序列。</div>
+                    <div style="font-size:12px; color:var(--text-light); margin-top:4px;">謝謝您的惠顧！訂單已列入核對序列。</div>
                 </div>
                 <div class="receipt-row"><span class="receipt-label">訂單編號:</span><span class="receipt-val" id="rcptId">-</span></div>
                 <div class="receipt-row"><span class="receipt-label">交易時間:</span><span class="receipt-val" id="rcptTime">-</span></div>
                 <div class="receipt-row"><span class="receipt-label">付款方式:</span><span class="receipt-val" id="rcptMethod">-</span></div>
                 <div class="receipt-row"><span class="receipt-label">會員卡號:</span><span class="receipt-val" id="rcptUid">-</span></div>
-                <div class="receipt-row"><span class="receipt-label">送貨地址:</span><span class="receipt-val" id="rcptAddress" style="color:#0288D1; font-weight:bold; text-align:right;">-</span></div>
-                <div class="receipt-row"><span class="receipt-label">入數紙憑證:</span><span class="receipt-val" id="rcptUploadStatusText" style="color:var(--accent-green); font-weight:bold;">✓ 雲端資料同步成功</span></div>
+                <div class="receipt-row"><span class="receipt-label">送貨地址:</span><span class="receipt-val" id="rcptAddress" style="color:#007AFF; font-weight:600;">-</span></div>
+                <div class="receipt-row"><span class="receipt-label">入數紙憑證:</span><span class="receipt-val" id="rcptUploadStatusText" style="color:var(--accent-green); font-weight:600;">✓ 雲端資料同步成功</span></div>
 
-                <div class="section-title" style="font-size:12px; margin:10px 0 4px 0;">購買明細</div>
+                <div class="section-title" style="font-size:13px; margin:14px 0 6px 0; font-weight: 700; color: var(--text-dark);">購買明細</div>
                 <div class="receipt-items-box" id="rcptItemsWall"></div>
                 <div class="receipt-total-line"><span>實收金額</span><span id="rcptTotalAmt">HK$ 0</span></div>
                 <div class="receipt-reward-box">
                     🎉 <b>會籍權益實時進帳：</b><br>
-                    • 本次消費成功賺取：<span id="rcptEarnedPts" style="font-weight:bold; color:var(--primary-color);">0</span> 積分<br>
-                    • 本次獲贈電子印花：<span id="rcptEarnedStamps" style="font-weight:bold; color:var(--primary-color);">0</span> 個星星章
+                    • 本次消費成功賺取：<span id="rcptEarnedPts" style="font-weight:700; color:var(--text-dark);">0</span> 積分<br>
+                    • 本次獲贈電子印花：<span id="rcptEarnedStamps" style="font-weight:700; color:var(--text-dark);">0</span> 個星星章
                 </div>
                 
-                <button class="btn-submit-payment" style="background-color:#0288D1; margin-top:12px;" onclick="exportReceiptToPDF()">📥 下載正式 PDF 收據</button>
-                <button class="btn-submit-payment" style="background-color:var(--text-dark); margin-top:6px;" onclick="saveReceiptAndClose()">💾 儲存收據並返回商店</button>
+                <button class="btn-submit-payment" style="background-color:#007AFF; margin-top:16px;" onclick="exportReceiptToPDF()">📥 下載正式 PDF 收據</button>
+                <button class="btn-submit-payment" style="background-color:var(--text-dark); margin-top:8px;" onclick="saveReceiptAndClose()">💾 儲存收據並返回商店</button>
             </div>
         </div>
 
@@ -378,19 +956,19 @@
                     </div>
                     <div>
                         <div class="member-name" id="mName">未登入會籍</div>
-                        <div style="font-size: 11px; color: #CFD8DC; margin-top: 2px;" id="mPhone">手機: -</div>
+                        <div style="font-size: 12px; color: #AEAEB2; margin-top: 2px;" id="mPhone">手機: -</div>
                     </div>
                 </div>
-                <div style="font-size:11px; color:#B0BEC5; margin-bottom:6px;" id="mUID">會員卡號: 未開通</div>
+                <div style="font-size:12px; color:#8E8E93; margin-bottom:8px;" id="mUID">會員卡號: 未開通</div>
                 <div class="member-details-grid">
-                    <div class="grid-item"><div class="grid-val" id="points">0</div><div style="font-size:11px; color:#B0BEC5;">現有積分</div></div>
-                    <div class="grid-item"><div class="grid-val" id="mSpent">HK$ 0</div><div style="font-size:11px; color:#B0BEC5;">累積消費 (<span id="mLevel">普通會員</span>)</div></div>
+                    <div class="grid-item"><div class="grid-val" id="points">0</div><div style="font-size:11px; color:#AEAEB2; margin-top: 2px;">現有積分</div></div>
+                    <div class="grid-item"><div class="grid-val" id="mSpent">HK$ 0</div><div style="font-size:11px; color:#AEAEB2; margin-top: 2px;">累積消費 (<span id="mLevel">普通會員</span>)</div></div>
                 </div>
             </div>
 
             <div class="section-title">數位印花收集卡</div>
             <div class="stamp-wallet-card">
-                <div class="stamp-card-header"><span>LOHAS STAMP CARD</span><span>已收集: <span id="stampCountText" style="font-size:14px; color:var(--secondary-color);">0</span> / 10</span></div>
+                <div class="stamp-card-header"><span>LOHAS STAMP CARD</span><span>已收集: <span id="stampCountText" style="font-size:15px; color:var(--white); font-weight: 700;">0</span> / 10</span></div>
                 <div class="stamp-grid">
                     <div class="stamp-slot" id="slot_1">1</div><div class="stamp-slot" id="slot_2">2</div><div class="stamp-slot" id="slot_3">3</div><div class="stamp-slot" id="slot_4">4</div><div class="stamp-slot" id="slot_5">5</div>
                     <div class="stamp-slot" id="slot_6">6</div><div class="stamp-slot" id="slot_7">7</div><div class="stamp-slot" id="slot_8">8</div><div class="stamp-slot" id="slot_9">9</div><div class="stamp-slot" id="slot_10">10</div>
@@ -398,17 +976,21 @@
                 <div class="stamp-card-footer">💡 印花規則：每結帳滿 HK$ 200 自動獲贈 1 個印花</div>
             </div>
 
-            <div class="section-title">貨品</div>
+            <div class="section-title">精選產品</div>
             <div class="products-grid" id="productsWall">
-                <p style="text-align:center; font-size:13px; color:var(--text-light); padding:20px;">📦 正在連接遠端 Firestore 貨物庫...</p>
+                <p style="text-align:center; font-size:14px; color:var(--text-light); padding:20px;">📦 正在連接遠端 Firestore 貨物庫...</p>
             </div>
 
             <div class="section-title">購物車清單</div>
-            <div class="card"><ul id="cart" class="cart-list"><li style="color:var(--text-light); font-style:italic; justify-content:center;">購物車目前無任何項目</li></ul></div>
+            <div class="card">
+                <ul id="cart" class="cart-list">
+                    <li style="color:var(--text-light); font-style:italic; justify-content:center; border: none;">購物車目前無任何項目</li>
+                </ul>
+            </div>
         </main>
 
         <section class="checkout-bar">
-            <div><span style="font-size:11px; color:var(--text-light); display:block;">合計應付</span><span id="total" class="summary-amt">HK$ 0</span></div>
+            <div><span style="font-size:12px; color:var(--text-light); display:block; font-weight: 500;">合計應付</span><span id="total" class="summary-amt">HK$ 0</span></div>
             <button class="btn-checkout" id="btnCheckout" onclick="checkout()">立即結帳</button>
         </section>
     </div>
@@ -434,7 +1016,6 @@
         let LIVE_PAYME_QR = "";
         let LIVE_ALIPAY_QR = ""; 
         let LIVE_FPS_QR = "";
-
         let currentUserId = ""; 
         let currentUserPhone = "";
         let unsubscribeUserListener = null; 
@@ -445,7 +1026,7 @@
         let loadedReceiptBase64 = ""; 
         let finalSavedAddress = "";
         
-        let isCompressingImage = false; 
+        let isCompressingImage = false;
         let activeSelectedBtnType = ""; 
         let GLOBAL_CURRENT_ORDER_TOTAL = 0; 
 
@@ -458,7 +1039,8 @@
         window.toggleModal = function(id, show) {
             const overlay = document.getElementById(id);
             if(overlay) {
-                if(show) overlay.classList.add("active"); else overlay.classList.remove("active");
+                if(show) overlay.classList.add("active");
+                else overlay.classList.remove("active");
             }
         };
 
@@ -469,7 +1051,7 @@
                 const el = document.getElementById(rId);
                 if (el) {
                     const isTarget = rId.includes(method.toLowerCase()) || 
-                                     (method.toLowerCase() === 'alipayhk' && rId === 'route_alipay');
+                              (method.toLowerCase() === 'alipayhk' && rId === 'route_alipay');
                     if (isTarget) el.classList.add('selected'); else el.classList.remove('selected');
                 }
             });
@@ -480,13 +1062,13 @@
             activeSelectedBtnType = type;
             const fileInputNode = document.getElementById("receiptFileInput");
             if (fileInputNode) {
-                fileInputNode.value = ""; 
+                fileInputNode.value = "";
                 if (type === 'camera') {
                     fileInputNode.setAttribute("capture", "environment");
                 } else {
                     fileInputNode.removeAttribute("capture");
                 }
-                fileInputNode.click(); 
+                fileInputNode.click();
             }
         };
 
@@ -578,7 +1160,7 @@
             imgElement.style.display = "none";
             const tipEl = document.getElementById("qrTextTip");
             if (tipEl) {
-                tipEl.innerHTML = `⚠️ 收款碼載入失敗<br><span style="font-size:10px; color:var(--primary-color);">請檢查雲端 Storage 檔案路徑與權限配置！</span>`;
+                tipEl.innerHTML = `⚠️ 收款碼載入失敗<br><span style="font-size:11px; color:var(--primary-color);">請檢查雲端 Storage 配置！</span>`;
                 tipEl.style.display = "block";
             }
         };
@@ -591,6 +1173,7 @@
                     LIVE_PAYME_QR = convertGsToHttp(payConfig.paymeQrUrl || "");
                     LIVE_ALIPAY_QR = convertGsToHttp(payConfig.alipayQrUrl || ""); 
                     LIVE_FPS_QR = convertGsToHttp(payConfig.fpsQrUrl || "");
+                    console.log("🔄 雲端私有路徑實時自動編譯完成:", { LIVE_PAYME_QR, LIVE_ALIPAY_QR, LIVE_FPS_QR });
                 }
             });
 
@@ -640,7 +1223,7 @@
                 const querySnapshot = await getDocs(q);
                 let targetUID = "";
                 if (!querySnapshot.empty) { 
-                    targetUID = querySnapshot.docs[0].id; 
+                    targetUID = querySnapshot.docs[0].id;
                 } 
                 else {
                     targetUID = "u" + Math.floor(10000 + Math.random() * 90000);
@@ -674,7 +1257,8 @@
                     for(let i = 1; i <= 10; i++) {
                         const slotEl = document.getElementById(`slot_${i}`);
                         if(i <= currentStamps) {
-                            slotEl.classList.add("active"); slotEl.innerHTML = "★";
+                            slotEl.classList.add("active");
+                            slotEl.innerHTML = "★";
                         } else { slotEl.classList.remove("active"); slotEl.innerHTML = i; }
                     }
                 }
@@ -684,7 +1268,8 @@
         window.triggerSignOut = function() {
             if(unsubscribeUserListener) { unsubscribeUserListener(); unsubscribeUserListener = null; }
             localStorage.removeItem("LOHAS_LOGGED_UID");
-            currentUserId = ""; currentUserPhone = ""; cart = []; renderCart();
+            currentUserId = "";
+            currentUserPhone = ""; cart = []; renderCart();
             location.reload();
         };
 
@@ -713,16 +1298,17 @@
                     alert("⚠️ 已達商品庫存上限！");
                     return;
                 }
-                item.qty++; renderCart(); 
+                item.qty++; renderCart();
             } 
         };
+
         window.decreaseQty = function(id) { let item = cart.find(i => i.id === id); if(item) { item.qty--; if(item.qty <= 0) cart = cart.filter(i => i.id !== id); renderCart(); } };
         window.removeItem = function(id) { cart = cart.filter(i => i.id !== id); renderCart(); toast("已移出項目"); };
 
         function renderCart(){
             const el = document.getElementById("cart");
             if (cart.length === 0) {
-                el.innerHTML = `<li style="color:var(--text-light); font-style:italic; justify-content:center;">購物車目前無任何項目</li>`;
+                el.innerHTML = `<li style="color:var(--text-light); font-style:italic; justify-content:center; border: none;">購物車目前無任何項目</li>`;
                 document.getElementById("total").innerText = "HK$ 0"; return;
             }
             el.innerHTML = "";
@@ -757,82 +1343,42 @@
             document.getElementById("btn_camera_trigger").classList.remove("has-file");
             document.getElementById("uiRcptPreviewBox").style.display = "none";
             document.getElementById("receiptFileInput").value = "";
-
             let checkoutFinalAmt = 0;
             for (let item of cart) {
                 checkoutFinalAmt += Number(item.price || 0) * Number(item.qty || 0);
             }
             
-            GLOBAL_CURRENT_ORDER_TOTAL = checkoutFinalAmt; 
+            GLOBAL_CURRENT_ORDER_TOTAL = checkoutFinalAmt;
             document.getElementById("payModalAmt").innerText = "HK$ " + GLOBAL_CURRENT_ORDER_TOTAL;
             toggleModal('paymentModalOverlay', true);
         };
 
-        /* 🛠️ 核心修正：第一階段（安全確認付款）改為「僅本地緩存定格」，絕不輸送出任何數據到 Firestore */
-        window.prepareLocalOrderTransaction = function() {
+        window.startServerOrderTransaction = async function() {
             const addressInput = document.getElementById("checkoutAddressField").value.trim();
             if(!addressInput) { alert("⚠️ 請先填妥詳細的送貨地址！"); return; }
             
-            finalSavedAddress = addressInput; 
+            finalSavedAddress = addressInput;
             toggleModal('paymentModalOverlay', false);
-            
-            // 本地動態預先定格唯一的訂單編號
-            cachedOrderIdForReceipt = "LOHAS-" + new Date().toISOString().slice(0,10).replace(/-/g,"") + "-" + Math.floor(1000 + Math.random() * 9000);
-
-            document.getElementById("qrModalRouteTitle").innerText = currentSelectedPay === "PayMe" ? "PayMe 轉帳" : (currentSelectedPay === "AlipayHK" ? "AlipayHK 轉帳" : "轉數快 FPS 快捷支付");
-            document.getElementById("qrModalAmtText").innerText = "HK$ " + GLOBAL_CURRENT_ORDER_TOTAL;
-            
-            let targetQrImg = currentSelectedPay === "PayMe" ? LIVE_PAYME_QR : (currentSelectedPay === "AlipayHK" ? LIVE_ALIPAY_QR : LIVE_FPS_QR);
-            const imgEl = document.getElementById("qrRealTargetImg");
-            const tipEl = document.getElementById("qrTextTip");
-
-            if(targetQrImg && targetQrImg.trim() !== "") {
-                if(tipEl) tipEl.style.display = "none";
-                imgEl.src = targetQrImg; 
-                imgEl.style.display = "block";
-            } else { 
-                imgEl.style.display = "none"; 
-                if(tipEl) {
-                    tipEl.innerText = "❌ 後台尚未配置收款二維碼網址";
-                    tipEl.style.display = "block";
-                }
-            }
-            
-            // 本地定格完成，直接開啟安全收銀台抽屜
-            toggleModal('qrCollectModalOverlay', true);
-        };
-
-        /* 🛠️ 核心修正：第二階段（撳生成收據鍵）此處執行真實的雲端原子交易，100% 綁定入數紙憑證輸送出 */
-        window.submitOrderWithReceiptToServer = async function() {
-            if (isCompressingImage) { alert("⏳ 憑證圖片壓縮中，請稍候..."); return; }
-            if(!loadedReceiptBase64 || loadedReceiptBase64.trim() === "") { 
-                alert("⚠️ 提交阻截：請先透過「📁 附加相簿檔案」或「📸 即時拍照上傳」提供清晰的銀行入數紙憑證！"); 
-                return; 
-            }
-
-            const cartSnapshot = [...cart];
-            toggleModal('qrCollectModalOverlay', false);
             
             const loaderOverlay = document.getElementById("paymentFullscreenLoader");
             const spinner = document.getElementById("ui_spinner");
             const checkmark = document.getElementById("ui_checkmark");
             const mainText = document.getElementById("loaderMainText");
-
-            // 開啟傳輸遮罩
             loaderOverlay.style.display = "flex"; spinner.style.display = "block"; checkmark.style.display = "none";
-            mainText.innerText = "正在向後台傳輸數據並扣減原子庫存...";
-
-            // 啟動終極雲端落庫鎖
+            mainText.innerText = `正在安全校驗庫存並同步雲端數據...`;
+            const generatedOrderId = "LOHAS-" + new Date().toISOString().slice(0,10).replace(/-/g,"") + "-" + Math.floor(1000 + Math.random() * 9000);
+            cachedOrderIdForReceipt = generatedOrderId;
             setTimeout(async () => {
                 try {
                     await runTransaction(db, async (transaction) => {
                         let verifiedProducts = [];
-                        for(let item of cartSnapshot) {
+                        for(let item of cart) {
                             const pRef = doc(db, "products", item.id);
                             const pSnap = await transaction.get(pRef);
                             if (!pSnap.exists()) throw `商品庫存檔案不存在`;
+    
                             let stock = Number(pSnap.data().stock) || 0;
-                            if(stock < item.qty) throw `【${item.name}】庫存不足！請重新挑選。`;
+                            if(stock < item.qty) throw `【${item.name}】庫存不足！`;
                             verifiedProducts.push({ ref: pRef, newStock: stock - item.qty });
                         }
 
@@ -844,7 +1390,7 @@
                         let currentSpent = Number(userSnap.data().totalSpent) || 0;
                         let currentStamps = Number(userSnap.data().stamps || 0);
 
-                        let earnedPoints = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 10); 
+                        let earnedPoints = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 10);
                         let earnedStamps = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 200); 
                         let newPoints = currentPoints + earnedPoints; 
                         let newSpent = currentSpent + GLOBAL_CURRENT_ORDER_TOTAL;
@@ -853,61 +1399,80 @@
 
                         let newLevel = "普通會員";
                         if (newSpent >= 5000) newLevel = "金級會員"; else if (newSpent >= 1500) newLevel = "銀級會員";
-
                         for(let prod of verifiedProducts) { transaction.update(prod.ref, { stock: prod.newStock }); }
                         transaction.update(userRef, { points: newPoints, totalSpent: newSpent, stamps: newStamps, level: newLevel, updatedAt: new Date() });
                         
-                        // 🌟 100% 完整結構一次性原子落庫發送，包含雙重映像憑證
-                        const orderRef = doc(db, "orders", cachedOrderIdForReceipt);
+                        const orderRef = doc(db, "orders", generatedOrderId);
                         transaction.set(orderRef, {
-                            orderId: cachedOrderIdForReceipt, 
-                            uid: currentUserId, 
-                            userPhone: currentUserPhone,          
-                            items: cartSnapshot, 
-                            total: GLOBAL_CURRENT_ORDER_TOTAL,       
-                            totalAmount: GLOBAL_CURRENT_ORDER_TOTAL, 
-                            paymentMethod: currentSelectedPay, 
-                            status: "pending_verification",          
-                            payment_status: "pending",            
-                            receiptImgBase64: loadedReceiptBase64, 
-                            receiptUrl: loadedReceiptBase64,       
-                            merchantPhone: LIVE_MERCHANT_PHONE, 
-                            address: finalSavedAddress, 
-                            createdAt: new Date()                 
+                            orderId: generatedOrderId, uid: currentUserId, userPhone: currentUserPhone,          
+                            items: cart, total: GLOBAL_CURRENT_ORDER_TOTAL, totalAmount: GLOBAL_CURRENT_ORDER_TOTAL, 
+                            paymentMethod: currentSelectedPay, status: "pending_verification", payment_status: "pending",            
+                            receiptImgBase64: "", receiptUrl: "", merchantPhone: LIVE_MERCHANT_PHONE, 
+                            address: finalSavedAddress, createdAt: new Date()     
                         });
                     });
 
-                    // 傳輸成功，更新 UI 收據票據
                     spinner.style.display = "none"; checkmark.style.display = "flex";
-                    mainText.innerText = "雲端訂單建立成功！";
+                    mainText.innerText = "雲端交易同步成功！";
 
-                    document.getElementById("rcptId").innerText = cachedOrderIdForReceipt;
-                    document.getElementById("rcptTime").innerText = new Date().toLocaleString('zh-HK');
-                    document.getElementById("rcptMethod").innerText = currentSelectedPay + " (附收據·待核對)";
-                    document.getElementById("rcptUid").innerText = currentUserId || "u101";
-                    document.getElementById("rcptTotalAmt").innerText = "HK$ " + GLOBAL_CURRENT_ORDER_TOTAL;
-                    document.getElementById("rcptEarnedPts").innerText = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 10);
-                    document.getElementById("rcptEarnedStamps").innerText = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 200);
-                    document.getElementById("rcptAddress").innerText = finalSavedAddress; 
+                    document.getElementById("qrModalRouteTitle").innerText = currentSelectedPay === "PayMe" ?
+                        "PayMe 轉帳" : (currentSelectedPay === "AlipayHK" ? "AlipayHK 轉帳" : "轉數快 FPS 快捷支付");
+                    document.getElementById("qrModalAmtText").innerText = "HK$ " + GLOBAL_CURRENT_ORDER_TOTAL;
+                    let targetQrImg = currentSelectedPay === "PayMe" ? LIVE_PAYME_QR : (currentSelectedPay === "AlipayHK" ? LIVE_ALIPAY_QR : LIVE_FPS_QR);
+                    const imgEl = document.getElementById("qrRealTargetImg");
+                    const tipEl = document.getElementById("qrTextTip");
 
-                    const rcptWall = document.getElementById("rcptItemsWall");
-                    rcptWall.innerHTML = "";
-                    cartSnapshot.forEach(item => {
-                        rcptWall.innerHTML += `<div class="receipt-item-line"><span>📦 ${item.name} (x${item.qty})</span><span>HK$ ${item.price * item.qty}</span></div>`;
-                    });
+                    if(targetQrImg && targetQrImg.trim() !== "") {
+                        if(tipEl) tipEl.style.display = "none";
+                        imgEl.src = targetQrImg; 
+                        imgEl.style.display = "block";
+                    } else { 
+                        imgEl.style.display = "none";
+                        if(tipEl) {
+                            tipEl.innerText = "❌ 後台尚未配置收款二維碼網址";
+                            tipEl.style.display = "block";
+                        }
+                    }
 
                     setTimeout(() => {
                         loaderOverlay.style.display = "none";
-                        document.getElementById("mViewReceiptBtn").style.display = "flex";
-                        toggleModal('receiptModalOverlay', true);
-                        cart = []; renderCart();
+                        toggleModal('qrCollectModalOverlay', true); 
                     }, 1000);
-
                 } catch (e) { 
-                    loaderOverlay.style.display = "none"; 
-                    alert("⚠️ 輸送訂單失敗，原因: " + e); 
+                    loaderOverlay.style.display = "none";
+                    alert("⚠️ 交易失敗，原因: " + e); 
                 }
-            }, 1200);
+            }, 1400);
+        };
+
+        window.closeQrAndTriggerReceipt = async function() {
+            if (isCompressingImage) { alert("⏳ 憑證圖片壓縮中，請稍候..."); return; }
+            if(!loadedReceiptBase64 || loadedReceiptBase64.trim() === "") { alert("⚠️ 請先提供過數紙憑證！"); return; }
+
+            const cartSnapshot = [...cart];
+            toggleModal('qrCollectModalOverlay', false);
+            document.getElementById("rcptId").innerText = cachedOrderIdForReceipt;
+            document.getElementById("rcptTime").innerText = new Date().toLocaleString('zh-HK');
+            document.getElementById("rcptMethod").innerText = currentSelectedPay + " (附收據·待核對)";
+            document.getElementById("rcptUid").innerText = currentUserId || "u101";
+            document.getElementById("rcptTotalAmt").innerText = "HK$ " + GLOBAL_CURRENT_ORDER_TOTAL;
+            document.getElementById("rcptEarnedPts").innerText = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 10);
+            document.getElementById("rcptEarnedStamps").innerText = Math.floor(GLOBAL_CURRENT_ORDER_TOTAL / 200);
+            document.getElementById("rcptAddress").innerText = finalSavedAddress;
+            const rcptWall = document.getElementById("rcptItemsWall");
+            rcptWall.innerHTML = "";
+            cartSnapshot.forEach(item => {
+                rcptWall.innerHTML += `<div class="receipt-item-line"><span>📦 ${item.name} (x${item.qty})</span><span>HK$ ${item.price * item.qty}</span></div>`;
+            });
+            try {
+                await setDoc(doc(db, "orders", cachedOrderIdForReceipt), { 
+                    receiptImgBase64: loadedReceiptBase64, receiptUrl: loadedReceiptBase64       
+                }, { merge: true });
+            } catch(err) { console.warn("憑證上載異常：", err.message); }
+
+            document.getElementById("mViewReceiptBtn").style.display = "flex";
+            toggleModal('receiptModalOverlay', true);
+            cart = []; renderCart();
         };
 
         window.saveReceiptAndClose = function() {
